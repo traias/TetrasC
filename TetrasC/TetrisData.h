@@ -117,6 +117,11 @@ extern BOOL MoveA(TETRIS_DATA* tet);
 extern BOOL MoveB(TETRIS_DATA* tet);
 extern BOOL MovePut(TETRIS_DATA* tet);
 
+/// コマンド通りに動かします。
+extern void MoveCommand(TETRIS_DATA* tet, char* command);
+
+
+
 /// <summary>
 /// 回転させたミノの位置を返します。
 /// </summary>
@@ -188,4 +193,11 @@ extern int CheckTSpin(MINO_TYPE* board, MINO_TYPE current, POINT* currentPoint, 
 
 /// スーパーローテーションシステムを実装します。返り値はSRSパターンです
 extern int GetSuperRotateMinoPoint(MINO_TYPE* board, MINO_TYPE current, POINT* currentPoint, int r, int nextR);
+
+
+
+
+
+extern void debugDrawBoard(TETRIS_DATA* tetris);
+extern void debugDrawBoard(TETRIS_DATA* tetris1, TETRIS_DATA* tetris2);
 

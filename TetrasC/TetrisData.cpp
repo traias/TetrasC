@@ -261,7 +261,7 @@ BOOL Hold(TETRIS_DATA* tet)
     tet->hold = temp;
 
     /// カレントが空の場合はNEXTから取り出します。
-    if (tet->control.current == 0)
+    if (tet->control.current == N)
     {
         getNext(tet);
     }
@@ -275,7 +275,6 @@ BOOL Hold(TETRIS_DATA* tet)
 
     tet->holdEnable = false;
     tet->control.delay += 3;
-
 
     return TRUE;
 }
@@ -465,6 +464,47 @@ BOOL MovePut(TETRIS_DATA* tet)
 
     return TRUE;
 }
+
+
+/// <summary>
+/// コマンド通りに動かします。
+/// </summary>
+/// <param name="tet"></param>
+/// <param name="command"></param>
+void MoveCommand(TETRIS_DATA* tet, char* command)
+{
+    for (int i = 0; command[i]; i++)
+    {
+        switch (command[i])
+        {
+        case 'l':
+            MoveLeft(tet);
+            break;
+        case 'r':
+            MoveRight(tet);
+            break;
+        case 'd':
+            MoveDD(tet);
+            break;
+        case 'R':
+            MoveA(tet);
+            break;
+        case 'L':
+            MoveB(tet);
+            break;
+        case 'h':
+            Hold(tet);
+            break;
+        case 'u':
+            MovePut(tet);
+            finishDrop(tet);
+            CorrectBoard(tet->board);
+            newMino(tet);
+        }
+    }
+}
+
+
 
 /// <summary>
 /// ゴーストのセル位置を取得します。
@@ -1107,4 +1147,71 @@ static int CheckSendline(MINO_TYPE* board, int deleteLine, int tSpinType, int re
     }
 
     return attack;
+}
+
+
+
+
+void debugDrawBoard(TETRIS_DATA* tetris)
+{
+    for (int y = 8; y >= 0; y--)
+    {
+        char line[11] = { 0 };
+        for (int x = 0; x < BOARD_W; x++)
+        {
+            if (tetris->board[x + (y * BOARD_W)] == 0)
+            {
+                line[x] = '_';
+            }
+            else
+            {
+                line[x] = 'X';
+            }
+        }
+        Debug("%s\n", line);
+    }
+    Debug("\n");
+}
+
+void debugDrawBoard(TETRIS_DATA* tetris1, TETRIS_DATA* tetris2)
+{
+    for (int y = 8; y >= 0; y--)
+    {
+        char line[22] = { 0 };
+        for (int x = 0; x < BOARD_W; x++)
+        {
+            switch (tetris1->board[x + (y * BOARD_W)])
+            {
+            case N: line[x] = '_'; break;
+            case I: line[x] = 'I'; break;
+            case J: line[x] = 'J'; break;
+            case L: line[x] = 'L'; break;
+            case O: line[x] = 'O'; break;
+            case S: line[x] = 'S'; break;
+            case T: line[x] = 'T'; break;
+            case Z: line[x] = 'Z'; break;
+            case G: line[x] = 'G'; break;
+            case C: line[x] = 'C'; break;
+            }
+        }
+        line[10] = '|';
+        for (int x = 0; x < BOARD_W; x++)
+        {
+            switch (tetris2->board[x + (y * BOARD_W)])
+            {
+            case N: line[x + 11] = '_'; break;
+            case I: line[x + 11] = 'I'; break;
+            case J: line[x + 11] = 'J'; break;
+            case L: line[x + 11] = 'L'; break;
+            case O: line[x + 11] = 'O'; break;
+            case S: line[x + 11] = 'S'; break;
+            case T: line[x + 11] = 'T'; break;
+            case Z: line[x + 11] = 'Z'; break;
+            case G: line[x + 11] = 'G'; break;
+            case C: line[x + 11] = 'C'; break;
+            }
+        }
+        Debug("%s\n", line);
+    }
+    Debug("\n");
 }
