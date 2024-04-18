@@ -231,20 +231,10 @@ TETRIS_SCENE TetrisAiInput(void)
         {
             TETRIS_DATA d;
             AiGetSolutionTetris(&d);
-            if ((tetrisData.hold == N) && (aiInputCommand[0] == 'h'))
-            {
-                for (int i = 2; i < NEXT_MAX; i++)
-                {
-                    d.next[i - 2] = tetrisData.next[i];
-                }
-            }
-            else
-            {
-                for (int i = 1; i < NEXT_MAX; i++)
-                {
-                    d.next[i - 1] = tetrisData.next[i];
-                }
-            }
+
+            Debug("%s\n", aiInputCommand);
+            debugDrawBoard(&d, &tetrisData);
+
             AiDecision(&d);
         }
 

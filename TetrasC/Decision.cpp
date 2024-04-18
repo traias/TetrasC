@@ -28,15 +28,6 @@ static int getDropPatterns(TETRIS_DATA* tet, DECISION_TETRIS** pattern, DECISION
 /// <returns></returns>
 static int getScoreList(TETRIS_DATA* base, DECISION_TETRIS** pattern, int patternMax, double* evalTable);
 
-
-/// <summary>
-/// かぶったボードのデータを無効にします。
-/// </summary>
-/// <param name=""></param>
-void distinctData(DECISION_TETRIS** pattern, int max);
-
-
-
 void debugDrawBoard(DECISION_TETRIS** pattern, int max);
 
 void debugDrawBoard(DECISION_TETRIS* pattern);
@@ -184,20 +175,16 @@ static DECISION_TETRIS* topPattern;
 static DECISION_TETRIS* secondPattern;
 
 /// <summary>
+/// 三手目以降のデータです。
+/// (最大12手までを対象にします。)
+/// </summary>
+static DECISION_TETRIS* searchPattern[10];
+
+/// <summary>
 /// 意思決定されたデータです。
 /// </summary>
 static DECISION_TETRIS* decisionPattern;
 
-/// <summary>
-/// 探索に使用するデータです。
-/// </summary>
-static DECISION_TETRIS* searchPattern;
-
-
-/// <summary>
-/// 探索時に使用する子供として使うデータです。
-/// </summary>
-static DECISION_TETRIS* childPattern;
 
 
 
@@ -228,8 +215,10 @@ void DecisionSystemInit(void)
 {
     topPattern = (DECISION_TETRIS*)malloc(sizeof(DECISION_TETRIS) * 96);
     secondPattern = (DECISION_TETRIS*)malloc(sizeof(DECISION_TETRIS) * 96 * 96);
-    childPattern = (DECISION_TETRIS*)malloc(sizeof(DECISION_TETRIS) * 96);
-    searchPattern = (DECISION_TETRIS*)malloc(sizeof(DECISION_TETRIS) * 200 * 96);
+    for (int i = 0; i < 10; i++)
+    {
+        searchPattern[i] = (DECISION_TETRIS*)malloc(sizeof(DECISION_TETRIS) * 200 * 96);
+    }
 }
 
 /// <summary>
@@ -238,8 +227,10 @@ void DecisionSystemInit(void)
 /// </summary>
 void DecisionSystemRelease(void)
 {
-    free(searchPattern);
-    free(childPattern);
+    for (int i = 0; i < 10; i++)
+    {
+        free(searchPattern[i]);
+    }
     free(secondPattern);
     free(topPattern);
 }
@@ -270,9 +261,6 @@ void Decision(TETRIS_DATA* tet)
         }
         Debug("二手目をチェックしました。[%d]パターン見つかりました。\n", searchCount);
 
-        // 被ったデータを削除します。
-        //distinctData(&secondPattern, searchCount);
-
         // 評価値でソートします。
         qsort(secondPattern, searchCount, sizeof(DECISION_TETRIS), cmpQsort);
         decisionPattern = &secondPattern[0];
@@ -286,6 +274,7 @@ void Decision(TETRIS_DATA* tet)
     }
 
     // 三手目以降を調べます。上位200手だけを採用して次の手を見ます。
+    int next = 0;
     {
         int nextSearch = searchCount;
         if (nextSearch > 200)
@@ -297,18 +286,15 @@ void Decision(TETRIS_DATA* tet)
         for (int i = 0; i < nextSearch; i++)
         {
             // 次の手を見ます。
-            DECISION_TETRIS* thard = &searchPattern[nextSearchCount];
+            DECISION_TETRIS* thard = &(searchPattern[next])[nextSearchCount];
             nextSearchCount += getDropPatterns(&secondPattern[i].tetris, &thard, &secondPattern[i]);
         }
 
         Debug("三手目をチェックしました。[%d]パターン見つかりました。\n", nextSearchCount);
 
-        // 被ったデータを削除します。
-        //distinctData(&searchPattern, nextSearchCount);
-
         // 評価値でソートします。
-        qsort(searchPattern, nextSearchCount, sizeof(DECISION_TETRIS), cmpQsort);
-        decisionPattern = &searchPattern[0];
+        qsort(searchPattern[next], nextSearchCount, sizeof(DECISION_TETRIS), cmpQsort);
+        decisionPattern = &searchPattern[next][0];
     }
 
     decisionRun = FALSE;
@@ -426,47 +412,6 @@ void getDecisionTetrisData(TETRIS_DATA *tetris)
     memcpy_s(tetris, sizeof(TETRIS_DATA), &decisionPattern->top->tetris, sizeof(TETRIS_DATA));
 }
 
-/// <summary>
-/// かぶったボードのデータを無効にします。
-/// </summary>
-/// <param name=""></param>
-void distinctData(DECISION_TETRIS** pattern, int max)
-{
-    for (int i = 0; i < (max - 1); i++)
-    {
-        if ((*pattern)[i].enable == FALSE) { continue; }
-
-        for (int n = (i + 1); n < max; n++)
-        {
-            if ((*pattern)[n].enable == FALSE) { continue; }
-
-            // 同じボードだった
-            if (
-                ((*pattern)[i].boardHash[0] == (*pattern)[n].boardHash[0]) &&
-                ((*pattern)[i].boardHash[1] == (*pattern)[n].boardHash[1]) &&
-                ((*pattern)[i].boardHash[2] == (*pattern)[n].boardHash[2]) &&
-                ((*pattern)[i].boardHash[3] == (*pattern)[n].boardHash[3])
-                )
-            {
-                /// ディレイが短いデータを採用します
-                if ((*pattern)[i].tetris.result.Delay > (*pattern)[n].tetris.result.Delay)
-                {
-                    (*pattern)[i].enable = FALSE;
-                }
-                else if ((*pattern)[i].tetris.result.Delay < (*pattern)[n].tetris.result.Delay)
-                {
-                    (*pattern)[n].enable = FALSE;
-                }
-                else
-                {
-                    (*pattern)[n].enable = FALSE;
-                }
-            }
-        }
-    }
-}
-
-
 
 int cmpQsort(const void* d1, const void* d2)
 {
@@ -531,10 +476,10 @@ void debugDrawBoard(DECISION_TETRIS* pattern)
 {
     if (pattern->enable == FALSE) { return; }
 
-    TETRIS_DATA* t = &pattern->tetris;
+    TETRIS_DATA* t = &pattern->top->tetris;
 
-    Debug("■%s\n", pattern->command);
-    Debug("eval=%lf\n", pattern->totalEval);
+    Debug("■%s\n", pattern->top->command);
+    Debug("eval=%lf\n", pattern->top->totalEval);
     Debug("current(%d), x=%d, y=%d, r=%d\n", t->prevControl.current, t->prevControl.pos.x, t->prevControl.pos.y, t->prevControl.r);
 
     for (int y = 8; y >= 0; y--)
