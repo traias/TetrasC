@@ -202,9 +202,9 @@ int GetDropAllPattern(TETRIS_DATA* tetris, DECISION_TETRIS** pattern, int startI
             char command[32] = { 0 };
             strcpy_s(command, 32, (*pattern)[i].command);
 
+            command[strlen(command) - 1] = '\0';
             if ((*pattern)[i].harddropCell > 0)
             {
-                command[strlen(command) - 1] = '\0';
                 strcat_s(command, 32, "d");
             }
 
