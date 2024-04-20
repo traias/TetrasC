@@ -142,7 +142,7 @@ void finishDrop(TETRIS_DATA* tet)
         }
         else
         {
-            tet->control.btb = TRUE;
+            tet->control.btb = FALSE;
         }
     }
 
@@ -174,38 +174,51 @@ void finishDrop(TETRIS_DATA* tet)
     {
         tet->prevResult.Tsm = 1;
         tet->result.Tsm++;
-        tet->control.delay += 40;
     }
     if ((tSpinType == 2) && (tet->prevResult.deleteLine == 2))
     {
         tet->prevResult.Tsmd = 1;
         tet->result.Tsmd++;
-        tet->control.delay += 45;
     }
     if ((tSpinType == 1) && (tet->prevResult.deleteLine == 1))
     {
         tet->prevResult.Tss = 1;
         tet->result.Tss++;
-        tet->control.delay += 40;
     }
     if ((tSpinType == 1) && (tet->prevResult.deleteLine == 2))
     {
         tet->prevResult.Tsd = 1;
         tet->result.Tsd++;
-        tet->control.delay += 45;
     }
     if ((tSpinType == 1) && (tet->prevResult.deleteLine == 3))
     {
         tet->prevResult.Tst = 1;
         tet->result.Tst++;
-        tet->control.delay += 45;
     }
     if (tet->prevResult.deleteLine == 4)
     {
         tet->prevResult.Tetris = 1;
         tet->result.Tetris++;
-        tet->control.delay += 50;
     }
+
+    // ライン消去のディレイを設定します。
+    if (tet->prevResult.deleteLine == 1)
+    {
+        tet->control.delay = 40;
+    }
+    if (tet->prevResult.deleteLine == 2)
+    {
+        tet->control.delay = 45;
+    }
+    if (tet->prevResult.deleteLine == 3)
+    {
+        tet->control.delay = 45;
+    }
+    if (tet->prevResult.deleteLine == 4)
+    {
+        tet->control.delay = 50;
+    }
+
     tet->prevResult.Delay = tet->control.delay;
     tet->result.Delay += tet->control.delay;
 }
@@ -1009,6 +1022,13 @@ int CorrectBoard(MINO_TYPE* board, BOOL clear)
                     }
                 }
                 y--;
+            }
+            else
+            {
+                for (int x = 0; x < BOARD_W; x++)
+                {
+                    board[x + (y * BOARD_W)] = C;
+                }
             }
         }
     }
