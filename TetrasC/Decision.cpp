@@ -248,11 +248,11 @@ static int getScoreList(TETRIS_DATA* base, DECISION_TETRIS** pattern, int patter
         if ((*pattern)[i].enable == FALSE) continue;
 
         /// ドロップパターンに対して評価畳み込みデータを作成します
-        GetEvaluation(&(*pattern)[i].tetris, (*pattern)[i].eval.eval, evalTable);
+        GetEvaluation(&(*pattern)[i].tetris, (*pattern)[i].eval, evalTable);
         (*pattern)[i].totalEval = 0;
         for (int n = 0; n < 20; n++)
         {
-            (*pattern)[i].totalEval += (*pattern)[i].eval.eval[n];
+            (*pattern)[i].totalEval += (*pattern)[i].eval[n];
         }
     }
 

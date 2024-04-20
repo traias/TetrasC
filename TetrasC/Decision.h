@@ -16,7 +16,7 @@ typedef struct tag_DECISION_TETRIS
     TETRIS_DATA tetris;
 
     // 評価値です。
-    EVAL eval;
+    double eval[20];
 
     // 総合評価値です。
     double totalEval;

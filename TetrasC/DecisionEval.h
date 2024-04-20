@@ -1,15 +1,6 @@
 #pragma once
 
 /// <summary>
-/// 評価データです。
-/// </summary>
-typedef struct
-{
-    double eval[20];
-} EVAL;
-
-
-/// <summary>
 /// 評価テーブル構造体です。
 /// </summary>
 typedef struct
