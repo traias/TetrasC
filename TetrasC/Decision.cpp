@@ -178,12 +178,6 @@ void Decision(TETRIS_DATA* tet)
         qsort(pattern, nextSearchCount, sizeof(DECISION_TETRIS), cmpQsort);
 
         decisionPattern = &pattern[0];
-
-        if (decisionPattern->top == NULL)
-        {
-            int a = 0;
-            Decision(tet);
-        }
     }
 
     decisionRun = FALSE;
