@@ -1,6 +1,11 @@
 #pragma once
 
 /// <summary>
+/// 評価値の説明名称です。
+/// </summary>
+extern const char* EvalName[20];
+
+/// <summary>
 /// 評価テーブル構造体です。
 /// </summary>
 typedef struct

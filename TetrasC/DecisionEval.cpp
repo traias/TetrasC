@@ -4,6 +4,35 @@
 #include "DecisionEval.h"
 
 
+/// <summary>
+/// 評価値の説明名称です。
+/// </summary>
+const char* EvalName[20] =
+{
+    "高さ",
+    "高さH",
+    "高さT",
+    "屋根",
+    "屋根SQ",
+    "井戸",
+    "凸凹",
+    "凸凹SQ",
+    "洞窟",
+    "洞窟SQ",
+    "閉塞",
+    "閉塞SQ",
+    "地形",
+    "HoldT",
+    "HoldI",
+    "HoldO",
+    "PC",
+    "Delay",
+    "Btb",
+    "火力",
+};
+
+
+
 /// 関数プロトタイプ宣言です
 
 /// 高さを取得します

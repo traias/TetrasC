@@ -234,7 +234,6 @@ TETRIS_SCENE TetrisAiInput(void)
             AiGetSolutionTetris(&d);
 
             Debug("%s\n", aiInputCommand);
-            debugDrawBoard(&d, &tetrisData);
 
             AiDecision(&d);
         }

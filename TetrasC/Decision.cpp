@@ -178,6 +178,20 @@ void Decision(TETRIS_DATA* tet)
         qsort(pattern, nextSearchCount, sizeof(DECISION_TETRIS), cmpQsort);
 
         decisionPattern = &pattern[0];
+
+        {
+            DECISION_TETRIS *t1 = &pattern[0];
+            Debug("■1番目のデータを表示します。\n");
+            debugDrawBoard(&t1);
+
+            DECISION_TETRIS* t2 = &pattern[1];
+            Debug("■2番目のデータを表示します。\n");
+            debugDrawBoard(&t2);
+
+            DECISION_TETRIS* t3 = &pattern[2];
+            Debug("■3番目のデータを表示します。\n");
+            debugDrawBoard(&t3);
+        }
     }
 
     decisionRun = FALSE;
@@ -339,13 +353,18 @@ void debugDrawBoard(DECISION_TETRIS** pattern, int max)
             char line[11] = { 0 };
             for (int x = 0; x < BOARD_W; x++)
             {
-                if (t->board[x + (y * BOARD_W)] == 0)
+                switch (t->board[x + (y * BOARD_W)])
                 {
-                    line[x] = '_';
-                }
-                else
-                {
-                    line[x] = 'X';
+                case N: line[x] = '_'; break;
+                case I: line[x] = 'I'; break;
+                case J: line[x] = 'J'; break;
+                case L: line[x] = 'L'; break;
+                case O: line[x] = 'O'; break;
+                case S: line[x] = 'S'; break;
+                case T: line[x] = 'T'; break;
+                case Z: line[x] = 'Z'; break;
+                case G: line[x] = 'G'; break;
+                case C: line[x] = 'C'; break;
                 }
             }
             Debug("%s\n", line);
@@ -370,13 +389,18 @@ void debugDrawBoard(DECISION_TETRIS* pattern)
         char line[11] = { 0 };
         for (int x = 0; x < BOARD_W; x++)
         {
-            if (t->board[x + (y * BOARD_W)] == 0)
+            switch (t->board[x + (y * BOARD_W)])
             {
-                line[x] = '_';
-            }
-            else
-            {
-                line[x] = 'X';
+            case N: line[x] = '_'; break;
+            case I: line[x] = 'I'; break;
+            case J: line[x] = 'J'; break;
+            case L: line[x] = 'L'; break;
+            case O: line[x] = 'O'; break;
+            case S: line[x] = 'S'; break;
+            case T: line[x] = 'T'; break;
+            case Z: line[x] = 'Z'; break;
+            case G: line[x] = 'G'; break;
+            case C: line[x] = 'C'; break;
             }
         }
         Debug("%s\n", line);
@@ -405,7 +429,12 @@ void debugDrawBoard(DECISION_TETRIS** pattern)
         TETRIS_DATA* t = &p->tetris;
 
         Debug("■%s\n", p->command);
-        Debug("eval=%lf\n", p->totalEval);
+        Debug("total eval=%lf\n", p->totalEval);
+        for (int i = 0; i < 20; i++)
+        {
+            Debug("%s=%.02lf, ", EvalName[i], p->eval[i]);
+        }
+        Debug("\n");
         Debug("current(%d), x=%d, y=%d, r=%d\n", t->prevControl.current, t->prevControl.pos.x, t->prevControl.pos.y, t->prevControl.r);
 
         for (int y = 8; y >= 0; y--)
@@ -413,13 +442,18 @@ void debugDrawBoard(DECISION_TETRIS** pattern)
             char line[11] = { 0 };
             for (int x = 0; x < BOARD_W; x++)
             {
-                if (t->board[x + (y * BOARD_W)] == 0)
+                switch (t->board[x + (y * BOARD_W)])
                 {
-                    line[x] = '_';
-                }
-                else
-                {
-                    line[x] = 'X';
+                case N: line[x] = '_'; break;
+                case I: line[x] = 'I'; break;
+                case J: line[x] = 'J'; break;
+                case L: line[x] = 'L'; break;
+                case O: line[x] = 'O'; break;
+                case S: line[x] = 'S'; break;
+                case T: line[x] = 'T'; break;
+                case Z: line[x] = 'Z'; break;
+                case G: line[x] = 'G'; break;
+                case C: line[x] = 'C'; break;
                 }
             }
             Debug("%s\n", line);
