@@ -208,28 +208,84 @@ int GetDropAllPattern(TETRIS_DATA* tetris, DECISION_TETRIS** pattern, int startI
                 strcat_s(command, 32, "d");
             }
 
-            // ドロップのテストを実行
-            const char* addCommand[12] = { "Lu", "Ru", "lu" , "llu" , "lllu" , "llllu" , "lllllu", "ru", "rru", "rrru", "rrrru", "rrrrru" };
-
-            for (int n = 0; n < 12; n++)
+            // ドロップのテストを実行[回転]
             {
-                // 結果のデータから探索用データを復旧させる
-                TETRIS_DATA copyTetris;
-                memcpy_s(&copyTetris, sizeof(TETRIS_DATA), tetris, sizeof(TETRIS_DATA));
-                memcpy_s(&copyTetris.control, sizeof(CONTROL), &(*pattern)[i].tetris.prevControl, sizeof(CONTROL));
-                copyTetris.control.delay += (*pattern)[i].harddropCell * 3;
+                const char* addCommand[2] = { "Lu", "Ru" };
 
-                int regist = DropTest(&copyTetris, pattern, registCount, patternMax, command, addCommand[n]);
-                if (regist == registCount) { continue; }
-
-                // 登録したものが前回と同一データに存在していたら処理しません。
-                if (findRegistPattern(&(*pattern)[registCount], pattern, startIndex, registCount) == TRUE)
+                for (int n = 0; n < 2; n++)
                 {
-                    (*pattern)[registCount].enable = FALSE; 
+                    // 結果のデータから探索用データを復旧させる
+                    TETRIS_DATA copyTetris;
+                    memcpy_s(&copyTetris, sizeof(TETRIS_DATA), tetris, sizeof(TETRIS_DATA));
+                    memcpy_s(&copyTetris.control, sizeof(CONTROL), &(*pattern)[i].tetris.prevControl, sizeof(CONTROL));
+                    copyTetris.control.delay += (*pattern)[i].harddropCell * 3;
+
+                    int regist = DropTest(&copyTetris, pattern, registCount, patternMax, command, addCommand[n]);
+                    if (regist == registCount) { continue; }
+
+                    // 登録したものが前回と同一データに存在していたら処理しません。
+                    if (findRegistPattern(&(*pattern)[registCount], pattern, startIndex, registCount) == TRUE)
+                    {
+                        (*pattern)[registCount].enable = FALSE;
+                    }
+                    else
+                    {
+                        registCount = regist;
+                    }
                 }
-                else
+            }
+
+            // ドロップのテストを実行[左移動]
+            {
+                const char* addCommand[6] = { "lu", "llu", "lllu", "llllu", "lllllu", "llllllu" };
+
+                for (int n = 0; n < 6; n++)
                 {
-                    registCount = regist;
+                    // 結果のデータから探索用データを復旧させる
+                    TETRIS_DATA copyTetris;
+                    memcpy_s(&copyTetris, sizeof(TETRIS_DATA), tetris, sizeof(TETRIS_DATA));
+                    memcpy_s(&copyTetris.control, sizeof(CONTROL), &(*pattern)[i].tetris.prevControl, sizeof(CONTROL));
+                    copyTetris.control.delay += (*pattern)[i].harddropCell * 3;
+
+                    int regist = DropTest(&copyTetris, pattern, registCount, patternMax, command, addCommand[n]);
+                    if (regist == registCount) { break; }
+
+                    // 登録したものが前回と同一データに存在していたら処理しません。
+                    if (findRegistPattern(&(*pattern)[registCount], pattern, startIndex, registCount) == TRUE)
+                    {
+                        (*pattern)[registCount].enable = FALSE;
+                    }
+                    else
+                    {
+                        registCount = regist;
+                    }
+                }
+            }
+
+            {
+                // ドロップのテストを実行[右移動]
+                const char* addCommand[6] = { "ru", "rru", "rrru", "rrrru", "rrrrru", "rrrrrru" };
+
+                for (int n = 0; n < 6; n++)
+                {
+                    // 結果のデータから探索用データを復旧させる
+                    TETRIS_DATA copyTetris;
+                    memcpy_s(&copyTetris, sizeof(TETRIS_DATA), tetris, sizeof(TETRIS_DATA));
+                    memcpy_s(&copyTetris.control, sizeof(CONTROL), &(*pattern)[i].tetris.prevControl, sizeof(CONTROL));
+                    copyTetris.control.delay += (*pattern)[i].harddropCell * 3;
+
+                    int regist = DropTest(&copyTetris, pattern, registCount, patternMax, command, addCommand[n]);
+                    if (regist == registCount) { break; }
+
+                    // 登録したものが前回と同一データに存在していたら処理しません。
+                    if (findRegistPattern(&(*pattern)[registCount], pattern, startIndex, registCount) == TRUE)
+                    {
+                        (*pattern)[registCount].enable = FALSE;
+                    }
+                    else
+                    {
+                        registCount = regist;
+                    }
                 }
             }
         }
