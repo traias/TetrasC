@@ -178,11 +178,11 @@ void setEvalTableDefault(EVAL_TABLE* table)
     table->caveSq = -0.01;
     table->close = -2;
     table->closeSq = -0.03;
-    table->tsdForm[0] = 0.1;
-    table->tsdForm[1] = 0.1;
-    table->tsdForm[2] = 0.4;
-    table->tsdForm[3] = 1.5;
-    table->tsdForm[4] = 4.0;
+    table->tsdForm[0] = 0.2;
+    table->tsdForm[1] = 0.5;
+    table->tsdForm[2] = 0.2;
+    table->tsdForm[3] = 0.5;
+    table->tsdForm[4] = 1.8;
     table->tstForm[0] = 0.0;
     table->tstForm[1] = 0.0;
     table->tstForm[2] = 0.0;
@@ -204,7 +204,7 @@ void setEvalTableDefault(EVAL_TABLE* table)
     table->tst = 6;
     table->line3 = -0.5;
     table->line4 = 4.0;
-    table->ren = 0.6;
+    table->ren = 0.2;
     table->delay = -0.03;
     table->btb = 0.5;
 
@@ -465,7 +465,7 @@ void GetEvaluation(TETRIS_DATA* tetris, double *eval, EVAL_TABLE* evalT)
 
     /// Btb•]‰¿‚Å‚·18
     {
-        if (tetris->control.btb != 0) eval[eval_index++] = evalT->btb;
+        if (tetris->control.btb == TRUE) eval[eval_index++] = evalT->btb;
         else eval[eval_index++] = 0;
     }
 
@@ -1242,7 +1242,7 @@ void GetLineClear(EVAL_TABLE* evalT, TETRIS_DATA* tetris, double* out1)
     if (tetris->control.ren >= 1)
     {
         double ren = ((double)tetris->control.ren - 1);
-        attack += ren * ren * evalT->ren;
+        attack += ren * evalT->ren;
     }
 
     (*out1) = attack;
