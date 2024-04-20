@@ -26,7 +26,7 @@ static int getDropPatterns(TETRIS_DATA* tet, DECISION_TETRIS** pattern, DECISION
 /// <param name="patternMax"></param>
 /// <param name="evalT"></param>
 /// <returns></returns>
-static int getScoreList(TETRIS_DATA* base, DECISION_TETRIS** pattern, int patternMax, double* evalTable);
+static int getScoreList(TETRIS_DATA* base, DECISION_TETRIS** pattern, int patternMax, EVAL_TABLE* evalTable);
 
 void debugDrawBoard(DECISION_TETRIS** pattern, int max);
 
@@ -35,133 +35,10 @@ void debugDrawBoard(DECISION_TETRIS* pattern);
 void debugDrawBoard(DECISION_TETRIS** pattern);
 
 
-
 /// <summary>
 /// 評価テーブルです。
 /// </summary>
-double evalTable[80] =
-{
-    /// 高さの列に対する重みです。(左右対称なので半分だけです。)
-    /// 0-4
-    0.9,
-    0.95,
-    0.98,
-    1,
-    1,
-
-    /// 高さ評価(-7, 8-14, 15-)
-    /// 5-7
-    -0.40,
-    -0.10,
-    -0.10,
-
-    /// 屋根の高さに対する重みです。(左右対称なので半分だけです。)
-    /// 8-12
-    1,
-    2,
-    1.5,
-    1,
-    1,
-
-    /// 屋根の高さ評価
-    /// 13-14
-    -0.15,
-    -0.03,
-
-    /// 井戸の列に対する重みです。(左右対称なので半分だけです。)
-    /// 15-19
-    -0.5,
-    -0.7,
-    -0.2,
-    0.7,
-    0.7,
-
-    /// 井戸の深さ評価
-    /// 20
-    0.05,
-
-    /// 表面形状の列に対する重みです。(左右対称なので半分だけです。)
-    /// 21-23
-    0.7,
-    0.8,
-    0.9,
-
-    /// 表面形状評価
-    /// 24-25
-    -0.2,
-    -0.2,
-
-    /// 洞窟評価
-    /// 26-27
-    -0.08,
-    -0.05,
-
-    /// 閉塞評価
-    /// 28-29
-    -3.6,
-    -0.3,
-
-    /// 火力地形評価(TSD/TST)
-    /// 30-39
-    0.0,
-    0.2,
-    0.1,
-    0.7,
-    1.8,
-    0.0,
-    0.0,
-    0.0,
-    0.0,
-    5.0,
-
-    /// ホールド評価
-    /// 40-42
-    0.05,
-    0.10,
-    -0.02,
-
-    /// パフェ地形評価
-    /// 43
-    0.5,
-
-    /// 火力評価
-    /// 44-63
-    -3.00,
-    -0.50,
-    99,
-
-    2.0,
-    -2.0,
-    -1.0,
-
-    2.8,
-    -1.5,
-    -8.8,
-    7.20,
-    -1.0,
-    -7.6,
-    9,
-    -7.4,
-    4.5,
-    0.6,
-
-    3.0,
-    0.1,
-    0.07,
-    20.0,
-
-    /// ディレイ評価
-    /// 64
-    -0.01,
-
-    /// Btb評価
-    /// 65
-    0.5,
-
-    /// 火力乗算評価
-    /// 66
-    1.0,
-};
+static EVAL_TABLE evalTable;
 
 
 /// <summary>
@@ -219,6 +96,9 @@ void DecisionSystemInit(void)
     {
         searchPattern[i] = (DECISION_TETRIS*)malloc(sizeof(DECISION_TETRIS) * 200 * 96);
     }
+
+    // デフォルトの評価テーブルを取得します。
+    setEvalTableDefault(&evalTable);
 }
 
 /// <summary>
@@ -318,7 +198,7 @@ void decisionAbort()
 static int getDropPatterns(TETRIS_DATA* tet, DECISION_TETRIS** pattern, DECISION_TETRIS* parent)
 {
     /// カレントとホールドで取りうるすべてのドロップパターンとスコアを取得します
-    int count = getScoreList(tet, pattern, 96, evalTable);
+    int count = getScoreList(tet, pattern, 96, &evalTable);
 
     /// 必要なデータの親子を設定します。
     for (int i = 0; i < count; i++)
@@ -353,7 +233,7 @@ static int getDropPatterns(TETRIS_DATA* tet, DECISION_TETRIS** pattern, DECISION
 /// <param name="patternMax"></param>
 /// <param name="evalT"></param>
 /// <returns></returns>
-static int getScoreList(TETRIS_DATA* base, DECISION_TETRIS** pattern, int patternMax, double* evalTable)
+static int getScoreList(TETRIS_DATA* base, DECISION_TETRIS** pattern, int patternMax, EVAL_TABLE* evalTable)
 {
     /// とりあえず全ドロップパターンを取得します
     int patternCount = GetDropPattern(base, pattern, patternMax);
