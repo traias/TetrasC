@@ -90,11 +90,11 @@ static BOOL abortRun = FALSE;
 /// </summary>
 void DecisionSystemInit(void)
 {
-    topPattern = (DECISION_TETRIS*)malloc(sizeof(DECISION_TETRIS) * 96);
-    secondPattern = (DECISION_TETRIS*)malloc(sizeof(DECISION_TETRIS) * 96 * 96);
+    topPattern = (DECISION_TETRIS*)calloc(96, sizeof(DECISION_TETRIS));
+    secondPattern = (DECISION_TETRIS*)calloc(96 * 96, sizeof(DECISION_TETRIS));
     for (int i = 0; i < 10; i++)
     {
-        searchPattern[i] = (DECISION_TETRIS*)malloc(sizeof(DECISION_TETRIS) * 200 * 96);
+        searchPattern[i] = (DECISION_TETRIS*)calloc(200 * 96, sizeof(DECISION_TETRIS));
     }
 
     // デフォルトの評価テーブルを取得します。
@@ -135,9 +135,9 @@ void Decision(TETRIS_DATA* tet)
     {
         for (int i = 0; i < patternCount; i++)
         {
-            DECISION_TETRIS* second = &secondPattern[searchCount];
-
-            searchCount += getDropPatterns(&topPattern[i].tetris, &second, &topPattern[i]);
+            if (topPattern[i].enable == FALSE) { continue; }
+            DECISION_TETRIS* p = &secondPattern[searchCount];
+            searchCount += getDropPatterns(&topPattern[i].tetris, &p, &topPattern[i]);
         }
         Debug("二手目をチェックしました。[%d]パターン見つかりました。\n", searchCount);
 
@@ -156,6 +156,8 @@ void Decision(TETRIS_DATA* tet)
     // 三手目以降を調べます。上位200手だけを採用して次の手を見ます。
     int next = 0;
     {
+        DECISION_TETRIS* pattern = searchPattern[next];
+
         int nextSearch = searchCount;
         if (nextSearch > 200)
         {
@@ -165,16 +167,23 @@ void Decision(TETRIS_DATA* tet)
         int nextSearchCount = 0;
         for (int i = 0; i < nextSearch; i++)
         {
-            // 次の手を見ます。
-            DECISION_TETRIS* thard = &(searchPattern[next])[nextSearchCount];
-            nextSearchCount += getDropPatterns(&secondPattern[i].tetris, &thard, &secondPattern[i]);
+            if (secondPattern[i].enable == FALSE) { continue; }
+            DECISION_TETRIS* p = &pattern[nextSearchCount];
+            nextSearchCount += getDropPatterns(&secondPattern[i].tetris, &p, &secondPattern[i]);
         }
 
         Debug("三手目をチェックしました。[%d]パターン見つかりました。\n", nextSearchCount);
 
         // 評価値でソートします。
-        qsort(searchPattern[next], nextSearchCount, sizeof(DECISION_TETRIS), cmpQsort);
-        decisionPattern = &searchPattern[next][0];
+        qsort(pattern, nextSearchCount, sizeof(DECISION_TETRIS), cmpQsort);
+
+        decisionPattern = &pattern[0];
+
+        if (decisionPattern->top == NULL)
+        {
+            int a = 0;
+            Decision(tet);
+        }
     }
 
     decisionRun = FALSE;
