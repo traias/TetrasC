@@ -234,6 +234,7 @@ static int getDropPatterns(TETRIS_DATA* tet, DECISION_TETRIS** pattern, DECISION
         {
             d->top = parent->top;
             d->parent = parent;
+            d->totalEval += d->parent->totalEval;
         }
         d->child = NULL;
         d->childCount = 0;
