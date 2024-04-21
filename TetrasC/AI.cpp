@@ -49,6 +49,7 @@ void AiDecision(TETRIS_DATA* tet)
 /// </summary>
 void AiAbort(void)
 {
+    decisionAbort();
     if (DecisionInstance.joinable() == true)
     {
         DecisionInstance.join();

@@ -225,6 +225,7 @@ TETRIS_SCENE TetrisAiInput(void)
     if (aiInputStatus == 0)
     {
         // 入力コマンドを取得します。
+        AiAbort();
         char* solutionCommand = AiGetSolution();
         strcpy_s(aiInputCommand, 32, solutionCommand);
 

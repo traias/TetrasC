@@ -154,11 +154,13 @@ void Decision(TETRIS_DATA* tet)
     }
 
     // 三手目以降を調べます。上位200手だけを採用して次の手を見ます。
-    int next = 0;
+    int prevSearchCount = searchCount;
+    DECISION_TETRIS* prevPattern = secondPattern;
+    for (int next = 0; next < 10; next++)
     {
         DECISION_TETRIS* pattern = searchPattern[next];
 
-        int nextSearch = searchCount;
+        int nextSearch = prevSearchCount;
         if (nextSearch > 200)
         {
             nextSearch = 200;
@@ -167,33 +169,32 @@ void Decision(TETRIS_DATA* tet)
         int nextSearchCount = 0;
         for (int i = 0; i < nextSearch; i++)
         {
-            if (secondPattern[i].enable == FALSE) { continue; }
+            if (prevPattern[i].enable == FALSE) { continue; }
             DECISION_TETRIS* p = &pattern[nextSearchCount];
-            nextSearchCount += getDropPatterns(&secondPattern[i].tetris, &p, &secondPattern[i]);
+            nextSearchCount += getDropPatterns(&prevPattern[i].tetris, &p, &prevPattern[i]);
         }
 
-        Debug("三手目をチェックしました。[%d]パターン見つかりました。\n", nextSearchCount);
+        Debug("%d手目をチェックしました。[%d]パターン見つかりました。\n", next + 3, nextSearchCount);
 
         // 評価値でソートします。
         qsort(pattern, nextSearchCount, sizeof(DECISION_TETRIS), cmpQsort);
 
+        // 一番評価の高いデータを保持します。
         decisionPattern = &pattern[0];
 
+        // 前回データとして今回のデータを保持します。
+        prevSearchCount = nextSearchCount;
+        prevPattern = searchPattern[next];
+
+        // 中断が指定されていたらこのタイミングで中断します。
+        if (abortRun == TRUE)
         {
-            DECISION_TETRIS *t1 = &pattern[0];
-            Debug("■1番目のデータを表示します。\n");
-            debugDrawBoard(&t1);
-
-            DECISION_TETRIS* t2 = &pattern[1];
-            Debug("■2番目のデータを表示します。\n");
-            debugDrawBoard(&t2);
-
-            DECISION_TETRIS* t3 = &pattern[2];
-            Debug("■3番目のデータを表示します。\n");
-            debugDrawBoard(&t3);
+            decisionRun = FALSE;
+            return;
         }
     }
 
+    debugDrawBoard(&decisionPattern);
     decisionRun = FALSE;
 }
 
