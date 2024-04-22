@@ -80,15 +80,6 @@ void registPattern(TETRIS_DATA* tetris, DECISION_TETRIS** pattern, int index, ch
 /// ハッシュコードを得ます
 unsigned __int64 getHash(MINO_TYPE mino, int r, POINT* cell);
 
-/// <summary>
-/// ボードのハッシュコードを得ます。
-/// </summary>
-/// <param name="mino"></param>
-/// <param name="r"></param>
-/// <param name="cell"></param>
-/// <returns></returns>
-void setBoardHash(DECISION_TETRIS** pattern, int index);
-
 /// 形状ハッシュコードが同一のデータを削除します
 void distinctHash(DECISION_TETRIS** pattern, int start, int end);
 
@@ -406,7 +397,6 @@ void registPattern(TETRIS_DATA* tetris, DECISION_TETRIS** pattern, int index, ch
         POINT cell[4];
         GetCellPoints((*pattern)[index].tetris.prevControl.current, &(*pattern)[index].tetris.prevControl.pos, (*pattern)[index].tetris.prevControl.r, cell);
         (*pattern)[index].hash = getHash((*pattern)[index].tetris.prevControl.current, (*pattern)[index].tetris.prevControl.r, cell);
-        setBoardHash(pattern, index);
     }
 
     /// データを有効に設定します
@@ -431,51 +421,6 @@ unsigned __int64 getHash(MINO_TYPE mino, int r, POINT* cell)
         ((((unsigned __int64)cell[0].x) << 0UL) & 0x000000000000000F)
         );
 }
-
-
-/// <summary>
-/// ボードのハッシュコードを得ます。
-/// </summary>
-/// <param name="mino"></param>
-/// <param name="r"></param>
-/// <param name="cell"></param>
-/// <returns></returns>
-void setBoardHash(DECISION_TETRIS** pattern, int index)
-{
-    (*pattern)[index].boardHash[0] = 0;
-    (*pattern)[index].boardHash[1] = 0;
-    (*pattern)[index].boardHash[2] = 0;
-    (*pattern)[index].boardHash[3] = 0;
-    for (int i = 0; i < 64; i++)
-    {
-        if ((*pattern)[index].tetris.board[i] != N)
-        {
-            (*pattern)[index].boardHash[0] |= (static_cast<__int64>(1) << i);
-        }
-    }
-    for (int i = 0; i < 64; i++)
-    {
-        if ((*pattern)[index].tetris.board[i + 64] != N)
-        {
-            (*pattern)[index].boardHash[1] |= (static_cast<__int64>(1) << i);
-        }
-    }
-    for (int i = 0; i < 64; i++)
-    {
-        if ((*pattern)[index].tetris.board[i + 128] != N)
-        {
-            (*pattern)[index].boardHash[2] |= (static_cast<__int64>(1) << i);
-        }
-    }
-    for (int i = 0; i < 64; i++)
-    {
-        if ((*pattern)[index].tetris.board[i + 192] != N)
-        {
-            (*pattern)[index].boardHash[3] |= (static_cast<__int64>(1) << i);
-        }
-    }
-}
-
 
 /// ハッシュが同一のデータを削除します
 void distinctHash(DECISION_TETRIS** pattern, int start, int end)

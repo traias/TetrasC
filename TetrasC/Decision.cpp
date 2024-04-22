@@ -348,7 +348,6 @@ void debugDrawBoard(DECISION_TETRIS** pattern, int max)
         Debug("¡%s\n", (*pattern)[i].command);
         Debug("eval=%lf\n", (*pattern)[i].totalEval);
         Debug("current(%d), x=%d, y=%d, r=%d\n", t->prevControl.current, t->prevControl.pos.x, t->prevControl.pos.y, t->prevControl.r);
-        Debug("HASH = %I64X, %I64X, %I64X, %I64X\n", (*pattern)[i].boardHash[0], (*pattern)[i].boardHash[1], (*pattern)[i].boardHash[2], (*pattern)[i].boardHash[3]);
 
         for (int y = 8; y >= 0; y--)
         {

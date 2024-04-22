@@ -25,9 +25,6 @@ typedef struct tag_DECISION_TETRIS
     // [ミノ種:8bit][回転:4bit][[セルの座標y:8bit,x:4bit]*4]
     __int64 hash;
 
-    // ボードのハッシュコードです。すべてビットで表現しています。
-    __int64 boardHash[4];
-
     // 入力コマンドです。
     char command[32];
 
