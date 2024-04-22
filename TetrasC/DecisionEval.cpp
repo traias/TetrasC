@@ -153,7 +153,7 @@ void setEvalTableDefault(EVAL_TABLE* table)
     table->heightWait[2] = 0.98;
     table->heightWait[3] = 1;
     table->heightWait[4] = 1;
-    table->height = -0.4;
+    table->height = -0.2;
     table->heightMid = -1.5;
     table->heightTop = -5.0;
     table->roofWait[0] = 1;
@@ -178,11 +178,11 @@ void setEvalTableDefault(EVAL_TABLE* table)
     table->caveSq = -0.01;
     table->close = -2;
     table->closeSq = -0.03;
-    table->tsdForm[0] = 0.2;
-    table->tsdForm[1] = 0.5;
-    table->tsdForm[2] = 0.2;
-    table->tsdForm[3] = 0.5;
-    table->tsdForm[4] = 1.8;
+    table->tsdForm[0] = 0.1;
+    table->tsdForm[1] = 0.4;
+    table->tsdForm[2] = 0.1;
+    table->tsdForm[3] = 0.4;
+    table->tsdForm[4] = 1.5;
     table->tstForm[0] = 0.0;
     table->tstForm[1] = 0.0;
     table->tstForm[2] = 0.0;
@@ -192,21 +192,21 @@ void setEvalTableDefault(EVAL_TABLE* table)
     table->holdI = 0.10;
     table->holdO = -0.02;
     table->pcForm = 0.5;
-    table->useT = -1.50;
+    table->useT = -1.80;
     table->useI = -0.50;
     table->pc = 999;
-    table->tss = 1.2;
-    table->tsm = -1.5;
-    table->line1 = -1.4;
-    table->tsd = 4.0;
-    table->tsmd = -0.8;
-    table->line2 = -1.0;
-    table->tst = 6;
-    table->line3 = -0.5;
-    table->line4 = 4.0;
-    table->ren = 0.2;
-    table->delay = -0.03;
-    table->btb = 0.5;
+    table->tss = 1.8;
+    table->tsm = -1.8;
+    table->line1 = -2.8;
+    table->tsd = 7.0;
+    table->tsmd = -1.2;
+    table->line2 = -2.0;
+    table->tst = 9.0;
+    table->line3 = -1.2;
+    table->line4 = 5.8;
+    table->ren = 0.3;
+    table->delay = -0.08;
+    table->btb = 0.8;
 
 // back_to_back: 52,
 // bumpiness : -24,
