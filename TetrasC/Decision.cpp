@@ -121,6 +121,7 @@ void DecisionSystemRelease(void)
 /// </summary>
 void Decision(TETRIS_DATA* tet)
 {
+    abortRun = FALSE;
     decisionRun = TRUE;
     Debug("意思決定を開始します。\n");
 
