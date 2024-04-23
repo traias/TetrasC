@@ -61,6 +61,13 @@ int setClosedArea(MINO_TYPE* board, int* closedBoard, int x, int y, int kind, in
 /// 火力地形を取得します。
 void getAttackPattern(EVAL_TABLE* evalT, TETRIS_DATA* tetris, int* boardHeight, double* out1);
 
+int checkTsd(int* board, int x, int y);
+
+int checkTstR(int* board, int x, int y);
+
+int checkTstL(int* board, int x, int y);
+
+
 // ホールド評価を取得
 void getHold(EVAL_TABLE* EvalT, TETRIS_DATA* Tetris, double* out1, double* out2, double* out3);
 
@@ -178,6 +185,12 @@ void setEvalTableDefault(EVAL_TABLE* table)
     table->caveSq = -0.01;
     table->close = -2;
     table->closeSq = -0.03;
+
+    table->tsdForm[0] = 0.2;
+    table->tsdForm[1] = 1.0;
+    table->tsdForm[2] = 1.2;
+    table->tsdForm[3] = 2.5;
+#if false
     table->tsdForm[0] = 0.1;
     table->tsdForm[1] = 0.4;
     table->tsdForm[2] = 0.1;
@@ -188,6 +201,8 @@ void setEvalTableDefault(EVAL_TABLE* table)
     table->tstForm[2] = 0.0;
     table->tstForm[3] = 0.0;
     table->tstForm[4] = 5.0;
+#endif
+
     table->holdT = 0.05;
     table->holdI = 0.10;
     table->holdO = -0.02;
@@ -791,225 +806,300 @@ int setClosedArea(MINO_TYPE* board, int* closedBoard, int x, int y, int kind, in
     return closeCell;
 }
 
+
+/// <summary>
+/// 火力地形を判定します。
+/// </summary>
+/// <param name="evalT"></param>
+/// <param name="tetris"></param>
+/// <param name="boardHeight"></param>
+/// <param name="out1"></param>
 void getAttackPattern(EVAL_TABLE* evalT, TETRIS_DATA* tetris, int* boardHeight, double* out1)
 {
-    double hyoka = 0.0;
-    double hyoka0 = 0.0;
-    double hyoka1 = 0.0;
-    int Board[BOARD_H] = { 0 };
+    const int TEMP_BOARD_H = 20;
+    int board[TEMP_BOARD_H] = { 0 };
 
-    for (int y = 0; y < BOARD_H; y++)
+    /// Tが近い時だけ判定を行います。
+    if (
+        (tetris->hold != T) &&
+        (tetris->next[0] != T) &&
+        (tetris->next[1] != T) &&
+        (tetris->next[2] != T) &&
+        (tetris->control.current != T)
+        )
+    {
+        out1 = 0;
+        return;
+    }
+
+    // 仮のボードを作成します。
+    for (int y = 0; y < TEMP_BOARD_H; y++)
     {
         for (int x = 0; x < BOARD_W; x++)
         {
             if (tetris->board[x + (y * BOARD_W)] != N)
             {
-                Board[y] |= (1 << x);
+                board[y] |= (1 << x);
             }
         }
     }
 
-    for (int x = 0; x < (BOARD_W - 3); x++)
+    int line = 0;
+    for (int x = 0; x < BOARD_W; x++)
     {
-        for (int y = boardHeight[x] + 2; y >= 2; y--)
+        for (int y = 0; y < boardHeight[x]; y++)
         {
-            // yがBOARD_H以上または0未満の場合、次の繰り返しに進む
-            if (y >= BOARD_H || y < 0) { continue; }
-
-            // 事前にビット操作を行い、結果を変数に保存
-            int boardY_2 = Board[y - 2];
-            int boardY_1 = Board[y - 1];
-            int boardY_0 = Board[y - 0];
-
-            // 埋まっていたら次のX軸に移る
-            if ((boardY_2 & (7 << x)) == 0x7)
+            int lineTsd = 0;
+            // 探索範囲
+            //    0123456789
+            // 19 __________
+            // 18 __________
+            // 17 XXXXXXXX__
+            // 3-16    :
+            // 2  XXXXXXXX__
+            // 1  XXXXXXXX__
+            // 0  XXXXXXXX__
+            if (x < (BOARD_W - 2))
             {
-                break;
+                lineTsd = checkTsd(board, x, y);
             }
 
-            // 一番下の段の評価
-            double hyouka1 = 0.0;
-            if (
-                (boardY_2 & (1 << x)) != 0 &&
-                (boardY_2 & (1 << (x + 1))) == 0 &&
-                (boardY_2 & (1 << (x + 2))) != 0)
+            int lineTstR = 0;
+            // 探索範囲
+            //    0123456789
+            // 19 __________
+            // 18 __________
+            // 17 XXXXXXX___
+            // 3-16    :
+            // 2  XXXXXXX___
+            // 1  XXXXXXX___
+            // 0  XXXXXXX___
+            if (x < (BOARD_W - 3))
             {
-                hyouka1 += evalT->tsdForm[0];
-                if ((boardY_2 | (7 << x)) == 0x3FF)
-                {
-                    hyouka1 += evalT->tsdForm[1];
-                }
-            }
-            else
-            {
-                continue;
+                lineTstR = checkTstR(board, x, y);
             }
 
-            // ２番下の段の評価
-            double hyouka2 = 0.0;
-            if (
-                (boardY_1 & (1 << x)) == 0 &&
-                (boardY_1 & (1 << (x + 1))) == 0 &&
-                (boardY_1 & (1 << (x + 2))) == 0)
+            int lineTstL = 0;
+            // 探索範囲
+            //    0123456789
+            // 19 __________
+            // 18 __________
+            // 17 _XXXXXXX__
+            // 3-16    :
+            // 2  _XXXXXXX__
+            // 1  _XXXXXXX__
+            // 0  _XXXXXXX__
+            if ((x >= 1) && (x < (BOARD_W - 2)))
             {
-                hyouka2 += evalT->tsdForm[2];
-                if ((boardY_1 | (7 << x)) == 0x3FF)
-                {
-                    hyouka2 += evalT->tsdForm[3];
-                }
-            }
-            else
-            {
-                continue;
+                lineTstL = checkTstL(board, x, y);
             }
 
-            // ３番下の段の評価
-            double hyouka3 = 0.0;
-            if (
-                (boardY_0 & (1 << x)) != 0 &&
-                (boardY_0 & (1 << (x + 1))) == 0 &&
-                (boardY_0 & (1 << (x + 2))) == 0)
-            {
-                hyouka3 += evalT->tsdForm[4];
-            }
-            else if (
-                (boardY_0 & (1 << x)) == 0 &&
-                (boardY_0 & (1 << (x + 1))) == 0 &&
-                (boardY_0 & (1 << (x + 2))) != 0)
-            {
-                hyouka3 += evalT->tsdForm[4];
-            }
-            else if ((boardY_0 & (1 << (x + 1))) != 0)
-            {
-                continue;
-            }
-
-            // 最終評価の計算
-            double totalHyoka = hyouka1 + hyouka2 + hyouka3;
-            if (hyoka0 < totalHyoka)
-            {
-                hyoka0 = totalHyoka;
-            }
-            else if (hyoka1 < totalHyoka)
-            {
-                hyoka1 = totalHyoka;
-            }
+            if (line > lineTsd) { line = lineTsd; }
+            if (line > lineTstR) { line = lineTstR; }
+            if (line > lineTstL) { line = lineTstL; }
+            if (line == 4) { break; }
         }
     }
 
-    hyoka = hyoka0 + hyoka1;
-
-#if true
-
-    double hyoka2 = 0.0;
-    double hyoka3 = 0.0;
-
-    for (int x = 0; x < (BOARD_W - 4); x++)
+    switch (line)
     {
-        for (int y = boardHeight[x] + 5; y >= 5; y--)
-        {
-            // yがBOARD_H以上または0未満の場合、次の繰り返しに進む
-            if (y >= BOARD_H || y < 0) { continue; }
+    case 0: *out1 = 0; break;
+    case 1: *out1 = evalT->tsdForm[0]; break;
+    case 2: *out1 = evalT->tsdForm[1]; break;
+    case 3: *out1 = evalT->tsdForm[2]; break;
+    case 4: *out1 = evalT->tsdForm[3]; break;
+    }
+}
 
-            int boardY_4 = Board[y - 4];
-            int boardY_3 = Board[y - 3];
-            int boardY_2 = Board[y - 2];
-            int boardY_1 = Board[y - 1];
-            int boardY_0 = Board[y - 0];
+// ___ 4
+// X_X 3
+// ooo 2
+// XoX 1
+int checkTsd(int* board, int x, int y)
+{
+    int line = 0;
 
-            // TSTのB回転の評価計算
-            double bHyoka1 = 0.0, bHyoka2 = 0.0, bHyoka3 = 0.0;
-            if (!(boardY_4 & (1 << (x + 2))) && (boardY_4 & (1 << (x + 3))))
-            {
-                bHyoka1 += evalT->tstForm[0];
-                if ((boardY_4 | (0x4 << x)) == 0x3FF)
-                {
-                    bHyoka1 += evalT->tstForm[1];
-                }
-            }
-
-            if (bHyoka1 != 0.0 &&
-                !(boardY_3 & ((1 << (x + 1)) | (1 << (x + 2)))) &&
-                boardY_2 & (1 << (x + 1)) &&
-                !(boardY_2 & (1 << (x + 2))) &&
-                boardY_2 & (1 << (x + 3)) &&
-                !(boardY_1 & ((1 << (x + 0)) | (1 << (x + 1)) | (1 << (x + 2)))) &&
-                !(boardY_0 & ((1 << (x + 0)) | (1 << (x + 1)))) &&
-                boardY_0 & (1 << (x + 2))
-                )
-            {
-                bHyoka3 += evalT->tstForm[4];
-            }
-            else if (
-                (boardY_3 & (1 << (x + 1))) ||
-                (boardY_3 & (1 << (x + 2))) ||
-                (boardY_2 & (1 << (x + 2))) ||
-                (boardY_1 & (1 << (x + 0))) ||
-                (boardY_1 & (1 << (x + 1))) ||
-                (boardY_1 & (1 << (x + 2))) ||
-                (boardY_0 & (1 << (x + 0))) ||
-                (boardY_0 & (1 << (x + 1)))
-                )
-            {
-                bHyoka2 = 0;
-                bHyoka1 = 0;
-            }
-
-            double totalBHyoka = bHyoka1 + bHyoka2 + bHyoka3;
-            if (hyoka2 < totalBHyoka)
-            {
-                hyoka2 = totalBHyoka;
-            }
-
-            // TSTのA回転の評価計算
-            double aHyoka1 = 0.0, aHyoka2 = 0.0, aHyoka3 = 0.0;
-            if (!(boardY_4 & (1 << (x + 1))) && (boardY_4 & (1 << (x + 2))))
-            {
-                aHyoka1 += evalT->tstForm[0];
-                if ((boardY_4 | (0x2 << x)) == 0x3FF)
-                {
-                    aHyoka1 += evalT->tstForm[1];
-                }
-            }
-
-            if (aHyoka1 != 0.0 &&
-                !(boardY_3 & ((1 << (x + 1)) | (1 << (x + 2)))) &&
-                boardY_2 & (1 << (x + 0)) &&
-                !(boardY_2 & (1 << (x + 1))) &&
-                boardY_2 & (1 << (x + 2)) &&
-                !(boardY_1 & ((1 << (x + 1)) | (1 << (x + 2)) | (1 << (x + 3)))) &&
-                !(boardY_0 & ((1 << (x + 2)) | (1 << (x + 3)))) &&
-                boardY_0 & (1 << (x + 1))
-                )
-            {
-                aHyoka3 += evalT->tstForm[4];
-            }
-            else if (
-                (boardY_3 & (1 << (x + 1))) ||
-                (boardY_3 & (1 << (x + 2))) ||
-                (boardY_2 & (1 << (x + 1))) ||
-                (boardY_1 & (1 << (x + 1))) ||
-                (boardY_1 & (1 << (x + 2))) ||
-                (boardY_1 & (1 << (x + 3))) ||
-                (boardY_0 & (1 << (x + 2))) ||
-                (boardY_0 & (1 << (x + 3)))
-                )
-            {
-                aHyoka2 = 0;
-                aHyoka1 = 0;
-            }
-
-            double totalAHyoka = aHyoka1 + aHyoka2 + aHyoka3;
-            if (hyoka3 < totalAHyoka)
-            {
-                hyoka3 = totalAHyoka;
-            }
-        }
+    // XoX 1
+    if ((board[y] & (0x7 << x)) == 0x5)
+    {
+        line = 1;
+    }
+    else
+    {
+        return line;
     }
 
-    *out1 = hyoka + hyoka2 + hyoka3;
-#endif
+    // ooo 2
+    if ((board[y + 1] & (0x7 << x)) == 0x0)
+    {
+        line = 2;
+    }
+    else
+    {
+        return line;
+    }
 
+    // X_X 3
+    if ((board[y + 2] & (0x7 << x)) == 0x1)
+    {
+        line = 3;
+    }
+    else if ((board[y + 2] & (0x7 << x)) == 0x4)
+    {
+        line = 3;
+    }
+    else
+    {
+        return line;
+    }
+
+    // ___ 4
+    if ((board[y + 3] & (0x7 << x)) == 0x0)
+    {
+        line = 4;
+    }
+    else
+    {
+        return line;
+    }
+
+    return line;
+}
+
+// ?X_ 4
+// ?__ 3
+// XoX 3
+// ?oo 2
+// ?oX 1
+// ?X? 0
+int checkTstR(int* board, int x, int y)
+{
+    int line = 0;
+
+    // ?X? 0
+    if ((board[y + 0] & (0x2 << x)) == 0x2)
+    {
+    }
+    else
+    {
+        return line;
+    }
+
+    // ?oX 1
+    if ((board[y + 1] & (0x6 << x)) == 0x4)
+    {
+        line = 1;
+    }
+    else
+    {
+        return line;
+    }
+
+    // ?oo 2
+    if ((board[y + 2] & (0x6 << x)) == 0x0)
+    {
+        line = 2;
+    }
+    else
+    {
+        return line;
+    }
+
+    // XoX 3
+    if ((board[y + 3] & (0x7 << x)) == 0x5)
+    {
+        line = 3;
+    }
+    else
+    {
+        return line;
+    }
+
+    // ?__ 3
+    if ((board[y + 4] & (0x6 << x)) == 0x0)
+    {
+        line = 3;
+    }
+    else
+    {
+        return line;
+    }
+
+    // ?X_ 4
+    if ((board[y + 5] & (0x6 << x)) == 0x2)
+    {
+        line = 4;
+    }
+
+    return line;
+}
+
+// _X? 4
+// __? 3
+// XoX 3
+// oo? 2
+// Xo? 1
+// ?X? 0
+int checkTstL(int* board, int x, int y)
+{
+    int line = 0;
+
+    // ?X? 0
+    if ((board[y + 0] & (0x2 << x)) == 0x2)
+    {
+    }
+    else
+    {
+        return line;
+    }
+
+    // Xo? 1
+    if ((board[y + 1] & (0x3 << x)) == 0x1)
+    {
+        line = 1;
+    }
+    else
+    {
+        return line;
+    }
+
+    // oo? 2
+    if ((board[y + 2] & (0x3 << x)) == 0x0)
+    {
+        line = 2;
+    }
+    else
+    {
+        return line;
+    }
+
+    // XoX 3
+    if ((board[y + 3] & (0x7 << x)) == 0x5)
+    {
+        line = 3;
+    }
+    else
+    {
+        return line;
+    }
+
+    // __? 3
+    if ((board[y + 4] & (0x3 << x)) == 0x0)
+    {
+        line = 3;
+    }
+    else
+    {
+        return line;
+    }
+
+    // _X? 4
+    if ((board[y + 5] & (0x3 << x)) == 0x2)
+    {
+        line = 4;
+    }
+
+    return line;
 }
 
 // ホールド評価を取得
