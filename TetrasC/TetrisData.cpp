@@ -12,10 +12,6 @@
 /// NEXTを取り出します。
 static void getNext(TETRIS_DATA* tet);
 
-/// TSpinかどうかの判定を行います。
-/// 1はTSpin、2はTSpinMiniです
-static int CheckTSpin(MINO_TYPE* board, MINO_TYPE current, POINT* currentPoint, int r, bool spin, int srs);
-
 /// 送信ライン数の計算を行います。
 static int CheckSendline(MINO_TYPE* board, int deleteLine, int tSpinType, int ren, BOOL btb);
 
@@ -917,9 +913,9 @@ int CheckTSpin(MINO_TYPE* board, MINO_TYPE current, POINT* currentPoint, int r, 
     /// 凸の後ろも取りたいので、4方向取っておきます。
     BOOL cell[4] = { FALSE };
 
-    if ((currentPoint->x >= 0) && (currentPoint->x < BOARD_W) && (currentPoint->y >= 0) && (currentPoint->y < 24))
+    if ((currentPoint->x >= 0) && (currentPoint->x < BOARD_W) && (currentPoint->y >= 0) && (currentPoint->y < 20))
     {
-        if (board[currentPoint->x, currentPoint->y] != 0)
+        if (board[currentPoint->x + (currentPoint->y * BOARD_W)] != N)
         {
             cell[0] = TRUE;
         }
@@ -928,9 +924,9 @@ int CheckTSpin(MINO_TYPE* board, MINO_TYPE current, POINT* currentPoint, int r, 
     {
         cell[0] = TRUE;
     }
-    if ((currentPoint->x >= -2) && (currentPoint->x < (BOARD_W - 2)) && (currentPoint->y >= 0) && (currentPoint->y < 24))
+    if ((currentPoint->x >= -2) && (currentPoint->x < (BOARD_W - 2)) && (currentPoint->y >= 0) && (currentPoint->y < 20))
     {
-        if (board[currentPoint->x + 2, currentPoint->y] != 0)
+        if (board[(currentPoint->x + 2) + (currentPoint->y * BOARD_W)] != N)
         {
             cell[1] = TRUE;
         }
@@ -939,9 +935,9 @@ int CheckTSpin(MINO_TYPE* board, MINO_TYPE current, POINT* currentPoint, int r, 
     {
         cell[1] = TRUE;
     }
-    if ((currentPoint->x >= -2) && (currentPoint->x < (BOARD_W - 2)) && (currentPoint->y >= 2) && (currentPoint->y < 24))
+    if ((currentPoint->x >= -2) && (currentPoint->x < (BOARD_W - 2)) && (currentPoint->y >= 2) && (currentPoint->y < 20))
     {
-        if (board[currentPoint->x + 2, currentPoint->y - 2] != 0)
+        if (board[(currentPoint->x + 2) + ((currentPoint->y - 2) * BOARD_W)] != N)
         {
             cell[2] = TRUE;
         }
@@ -950,9 +946,9 @@ int CheckTSpin(MINO_TYPE* board, MINO_TYPE current, POINT* currentPoint, int r, 
     {
         cell[2] = TRUE;
     }
-    if ((currentPoint->x >= 0) && (currentPoint->x < BOARD_W) && (currentPoint->y >= 2) && (currentPoint->y < 24))
+    if ((currentPoint->x >= 0) && (currentPoint->x < BOARD_W) && (currentPoint->y >= 2) && (currentPoint->y < 20))
     {
-        if (board[currentPoint->x, currentPoint->y - 2] != 0)
+        if (board[currentPoint->x + ((currentPoint->y - 2) * BOARD_W)] != N)
         {
             cell[3] = TRUE;
         }
@@ -962,28 +958,56 @@ int CheckTSpin(MINO_TYPE* board, MINO_TYPE current, POINT* currentPoint, int r, 
         cell[3] = TRUE;
     }
 
-    /// 回転に合わせてセル情報を回転させます。
-    for (int i = r; i > 0; i--)
-    {
-        bool tempCell = cell[3];
-        cell[3] = cell[0];
-        cell[0] = cell[1];
-        cell[1] = cell[2];
-        cell[2] = tempCell;
-    }
-
     /// 最低3隅が埋まっていなければTSpinになりません。
     int count = 0;
     for (int i = 0; i < 4; i++)
     {
-        if (cell[i] == TRUE) count++;
+        if (cell[i] == TRUE)
+        {
+            count++;
+        }
     }
-    if (count < 3) return 0;
+    if (count < 3)
+    {
+        return 0;
+    }
+
+    /// 回転に合わせてセル情報を回転させます。凸の形にします。
+    /// 回転0  回転1  回転2  回転3
+    /// 0 T 1  2 T 0  3 - 2  1 T 3
+    /// T T T  - T T  T T T  T T -
+    /// 2 - 3  3 T 1  1 T 0  0 T 2
+    bool tempCell = cell[3];
+    switch (r)
+    {
+    case 1:
+        cell[3] = cell[1];
+        cell[1] = cell[0];
+        cell[0] = cell[2];
+        cell[2] = tempCell;
+        break;
+    case 2:
+        cell[3] = cell[0];
+        cell[0] = tempCell;
+        tempCell = cell[1];
+        cell[1] = cell[2];
+        cell[2] = tempCell;
+        break;
+    case 3:
+        cell[3] = cell[2];
+        cell[2] = cell[0];
+        cell[0] = cell[1];
+        cell[1] = tempCell;
+        break;
+    }
 
     /// 3隅のうち、0,1が埋まっていなければTSpinMiniです。
     if (cell[0] != cell[1])
     {
-        if (srs != 4) return 2;
+        if (srs != 4)
+        {
+            return 2;
+        }
     }
 
     return 1;
