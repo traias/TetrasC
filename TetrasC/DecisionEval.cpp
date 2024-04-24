@@ -825,7 +825,7 @@ void getAttackPattern(EVAL_TABLE* evalT, TETRIS_DATA* tetris, int* boardHeight, 
         (tetris->next[0] != T) &&
         (tetris->next[1] != T) &&
         (tetris->next[2] != T) &&
-        (tetris->control.current != T)
+        (tetris->next[3] != T)
         )
     {
         out1 = 0;
