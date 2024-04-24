@@ -212,15 +212,15 @@ void setEvalTableDefault(EVAL_TABLE* table)
     table->pc = 999;
     table->tss = 1.8;
     table->tsm = -1.8;
-    table->line1 = -2.8;
+    table->line1 = -3.5;
     table->tsd = 7.0;
     table->tsmd = -1.2;
-    table->line2 = -2.0;
+    table->line2 = -2.5;
     table->tst = 9.0;
-    table->line3 = -1.2;
+    table->line3 = -1.6;
     table->line4 = 5.8;
     table->ren = 0.3;
-    table->delay = -0.08;
+    table->delay = -0.04;
     table->btb = 0.8;
 
 // back_to_back: 52,
@@ -636,10 +636,10 @@ int getWell(EVAL_TABLE* evalT, TETRIS_DATA* tetris, int* boardHeight, int* depth
         return -1;
     }
 
-    /// ˆê”Ô[‚¢ˆäŒË‚Ìˆê”Ô‰º‚©‚ç”‚¦‚Ä4’i‚ğÅ‘å‚Æ‚µ‚ÄˆäŒËˆµ‚¢‚É‚µ‚Ü‚·
+    /// ˆê”Ô[‚¢ˆäŒË‚Ìˆê”Ô‰º‚©‚ç”‚¦‚Ä7’i‚ğÅ‘å‚Æ‚µ‚ÄˆäŒËˆµ‚¢‚É‚µ‚Ü‚·
     (*depth) = 0;
     BOOL finish = FALSE;
-    for (int i = boardHeight[wellColumn]; i < (boardHeight[wellColumn] + 4); i++)
+    for (int i = boardHeight[wellColumn]; i < (boardHeight[wellColumn] + 7); i++)
     {
         BOOL fill = TRUE;
         for (int x = 0; x < BOARD_W; x++)
