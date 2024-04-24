@@ -504,7 +504,7 @@ BOOL TetrisDraw(void)
         int y = (frameH / 2) - (minoH / 2);
         DrawGraph(10 + x, 32 + + y, minoHandle[index], TRUE);
     }
-    if (tetrisData.holdEnable == false)
+    if (tetrisData.holdEnable == FALSE)
     {
         int minoW;
         int minoH;

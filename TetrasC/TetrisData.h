@@ -188,7 +188,7 @@ extern void putBoard(MINO_TYPE* board, MINO_TYPE current, int r, POINT* pos);
 /// <param name="spin"></param>
 /// <param name="srs"></param>
 /// <returns></returns>
-extern int CheckTSpin(MINO_TYPE* board, MINO_TYPE current, POINT* currentPoint, int r, bool spin, int srs);
+extern int CheckTSpin(MINO_TYPE* board, MINO_TYPE current, POINT* currentPoint, int r, BOOL spin, int srs);
 
 
 /// スーパーローテーションシステムを実装します。返り値はSRSパターンです

@@ -282,7 +282,7 @@ BOOL Hold(TETRIS_DATA* tet)
         return FALSE;
     }
 
-    tet->holdEnable = false;
+    tet->holdEnable = FALSE;
     tet->control.delay += 3;
 
     return TRUE;
@@ -735,10 +735,10 @@ BOOL CheckCollision(MINO_TYPE *board, POINT* cellPoints)
 {
     for (int i = 0; i < 4; i++)
     {
-        if (cellPoints[i].x > (10 - 1)) return true;
-        if (cellPoints[i].x < 0) return true;
-        if (cellPoints[i].y < 0) return true;
-        if (cellPoints[i].y > (24 - 1)) return true;
+        if (cellPoints[i].x > (10 - 1)) return TRUE;
+        if (cellPoints[i].x < 0) return TRUE;
+        if (cellPoints[i].y < 0) return TRUE;
+        if (cellPoints[i].y > (24 - 1)) return TRUE;
 
         if (board[cellPoints[i].x + (cellPoints[i].y * BOARD_W)] != N)
         {
@@ -875,7 +875,7 @@ int GetSuperRotateMinoPoint(MINO_TYPE* board, MINO_TYPE current, POINT* currentP
             POINT mino_point[4];
             GetCellPoints(current, &destPoint, r, mino_point);
 
-            if (CheckCollision(board, mino_point) == false)
+            if (CheckCollision(board, mino_point) == FALSE)
             {
                 currentPoint->x = destPoint.x;
                 currentPoint->y = destPoint.y;
@@ -899,11 +899,11 @@ int GetSuperRotateMinoPoint(MINO_TYPE* board, MINO_TYPE current, POINT* currentP
 /// <param name="spin"></param>
 /// <param name="srs"></param>
 /// <returns></returns>
-int CheckTSpin(MINO_TYPE* board, MINO_TYPE current, POINT* currentPoint, int r, bool spin, int srs)
+int CheckTSpin(MINO_TYPE* board, MINO_TYPE current, POINT* currentPoint, int r, BOOL spin, int srs)
 {
     /// TミノでなければTスピンできません
     /// スピンしてなければTスピンできません
-    if ((spin == false) || current != T)
+    if ((spin == FALSE) || current != T)
     {
         return 0;
     }
@@ -977,7 +977,7 @@ int CheckTSpin(MINO_TYPE* board, MINO_TYPE current, POINT* currentPoint, int r, 
     /// 0 T 1  2 T 0  3 - 2  1 T 3
     /// T T T  - T T  T T T  T T -
     /// 2 - 3  3 T 1  1 T 0  0 T 2
-    bool tempCell = cell[3];
+    BOOL tempCell = cell[3];
     switch (r)
     {
     case 1:

@@ -77,7 +77,7 @@ void getPerfectClear(EVAL_TABLE* evalT, TETRIS_DATA* tetris, double* out1);
 // フィールド的にパフェ可能かどうかを返します。
 // 可能な場合は手数を返します。-1はパフェ不可です。
 int checkPerfectClear(MINO_TYPE* board);
-bool checkPerfectClearSplit(MINO_TYPE* board, int height);
+BOOL checkPerfectClearSplit(MINO_TYPE* board, int height);
 
 // ライン消去評価を取得
 void GetLineClear(EVAL_TABLE* evalT, TETRIS_DATA* tetris, double* out1);
@@ -516,7 +516,7 @@ void getHeight(EVAL_TABLE* evalT, TETRIS_DATA* tetris, double* out1, double* out
     {
         for (int y = (BOARD_H - 1); y >= 0; y--)
         {
-            if ((tetris->board[x + (y * BOARD_W)]) != 0)
+            if ((tetris->board[x + (y * BOARD_W)]) != N)
             {
                 if (height < (y * t[x])) { height = (y * t[x]); }
                 break;
@@ -638,10 +638,10 @@ int getWell(EVAL_TABLE* evalT, TETRIS_DATA* tetris, int* boardHeight, int* depth
 
     /// 一番深い井戸の一番下から数えて4段を最大として井戸扱いにします
     (*depth) = 0;
-    bool finish = false;
+    BOOL finish = FALSE;
     for (int i = boardHeight[wellColumn]; i < (boardHeight[wellColumn] + 4); i++)
     {
-        BOOL fill = true;
+        BOOL fill = TRUE;
         for (int x = 0; x < BOARD_W; x++)
         {
             if (x == wellColumn) { continue; }
@@ -654,7 +654,7 @@ int getWell(EVAL_TABLE* evalT, TETRIS_DATA* tetris, int* boardHeight, int* depth
 
         if (fill == TRUE)
         {
-            if (finish == true)
+            if (finish == TRUE)
             {
                 (*depth) = 0;
                 break;
@@ -665,7 +665,7 @@ int getWell(EVAL_TABLE* evalT, TETRIS_DATA* tetris, int* boardHeight, int* depth
         {
             if ((*depth) > 0)
             {
-                finish = true;
+                finish = TRUE;
             }
             break;
         }
@@ -738,7 +738,7 @@ void getCave(EVAL_TABLE* evalT, TETRIS_DATA* tetris, int* boardHeight, double* o
     {
         for (int y = 0; y < boardHeight[x]; y++)
         {
-            if ((tetris->board[x + (y * BOARD_W)]) == 0)
+            if ((tetris->board[x + (y * BOARD_W)]) == N)
             {
                 cave++;
             }
@@ -768,7 +768,7 @@ void getClosedArea(EVAL_TABLE* evalT, TETRIS_DATA* tetris, double* out1, double*
     {
         for (int x = 0; x < BOARD_W; x++)
         {
-            if ((ClosedBoard[(y * BOARD_W) + x] == 0) && ((tetris->board[x + (y * BOARD_W)]) == 0))
+            if ((ClosedBoard[(y * BOARD_W) + x] == 0) && ((tetris->board[x + (y * BOARD_W)]) == N))
             {
                 AreaKind++;
                 if (setClosedArea(tetris->board, ClosedBoard, x, y, AreaKind, 1) != 0)
@@ -794,7 +794,7 @@ int setClosedArea(MINO_TYPE* board, int* closedBoard, int x, int y, int kind, in
     // 今参照しているINDEXを持っておきます。
     int index = (y * BOARD_W) + x;
 
-    if ((closedBoard[index] == 0) && ((board[x + (y * BOARD_W)]) == 0))
+    if ((closedBoard[index] == 0) && ((board[x + (y * BOARD_W)]) == N))
     {
         closedBoard[index] = kind;
         closeCell = setClosedArea(board, closedBoard, x + 1, y, kind, closeCell);
@@ -1133,7 +1133,7 @@ void getPerfectClear(EVAL_TABLE* evalT, TETRIS_DATA* tetris, double* out1)
 int checkPerfectClear(MINO_TYPE* board)
 {
     int space_count = 0;
-    bool check_split = false;
+    BOOL check_split = FALSE;
 
     /// パフェが取れそうな高さです。
     int height = 0;
@@ -1185,16 +1185,16 @@ int checkPerfectClear(MINO_TYPE* board)
     if (height == 0 || height > 6) return -1;
 
     /// 分割空間(縦埋まりの計算)のセル数も4の倍数でないとパフェが取れません。
-    if (check_split == true)
+    if (check_split == TRUE)
     {
-        if (checkPerfectClearSplit(board, height) == false)
+        if (checkPerfectClearSplit(board, height) == FALSE)
         {
             if (height >= 4)
             {
                 return -1;
             }
 
-            if (checkPerfectClearSplit(board, height + 2) == false)
+            if (checkPerfectClearSplit(board, height + 2) == FALSE)
             {
                 return -1;
             }
@@ -1206,7 +1206,7 @@ int checkPerfectClear(MINO_TYPE* board)
 }
 
 
-bool checkPerfectClearSplit(MINO_TYPE* board, int height)
+BOOL checkPerfectClearSplit(MINO_TYPE* board, int height)
 {
     // 空きセル数をカウントします。
     int space_count = 0;
@@ -1216,23 +1216,23 @@ bool checkPerfectClearSplit(MINO_TYPE* board, int height)
         int fill_count = 0;
 
         // 縦閉塞を調べます。
-        bool side_space = false;
+        BOOL side_space = FALSE;
         int line_space = 0;
 
-        bool side_space_left = x > 0;
-        bool side_space_right = x < (BOARD_W - 1);
+        BOOL side_space_left = x > 0;
+        BOOL side_space_right = x < (BOARD_W - 1);
 
         for (int y = 0; y < height; y++)
         {
             // 空きセルのカウントを行います。
-            if ((board[x + (y * BOARD_W)]) == 0)
+            if ((board[x + (y * BOARD_W)]) == N)
             {
                 space_count++;
                 line_space++;
 
                 // 両サイドのいずれかが空きセルかどうかを調べます。
-                if (side_space_left && (board[(x - 1) + (y * BOARD_W)]) == 0) side_space = true;
-                if (side_space_right && (board[(x + 1) + (y * BOARD_W)]) == 0) side_space = true;
+                if (side_space_left && (board[(x - 1) + (y * BOARD_W)]) == N) side_space = TRUE;
+                if (side_space_right && (board[(x + 1) + (y * BOARD_W)]) == N) side_space = TRUE;
             }
 
             // ミノセルのカウントを行います。
@@ -1240,21 +1240,21 @@ bool checkPerfectClearSplit(MINO_TYPE* board, int height)
         }
 
         // スペースがありサイドが全部埋まってたらパフェはできません。
-        if ((line_space > 0) && (side_space == false)) { return false; }
+        if ((line_space > 0) && (side_space == FALSE)) { return FALSE; }
 
         // 縦埋めがあった場合、以前のスペースが4の倍数でなければパフェはできません。
         if (fill_count == height)
         {
-            if ((space_count % 4) != 0) return false;
+            if ((space_count % 4) != 0) return FALSE;
             space_count = 0;
         }
     }
 
     // 最後ももちろん空きセルが4の倍数でないとパフェできません。
-    if ((space_count % 4) != 0) return false;
+    if ((space_count % 4) != 0) return FALSE;
 
     // ここまでくればパフェ可能です。
-    return true;
+    return TRUE;
 }
 
 

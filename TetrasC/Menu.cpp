@@ -34,12 +34,6 @@ void MenuDraw(void);
 /// <returns>選択メニュー</returns>
 MENU_SELECT changeMenuSelect(MENU_SELECT select, int increment);
 
-
-/// <summary>
-/// メニューの終了です。
-/// </summary>
-static int menuAbort = false;
-
 /// <summary>
 /// メニュー選択項目
 /// </summary>
