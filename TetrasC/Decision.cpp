@@ -69,6 +69,7 @@ static DECISION_TETRIS* decisionPattern;
 int cmpQsort(const void* d1, const void* d2);
 
 
+void sortDecisionTetris(DECISION_TETRIS* pattern, int count);
 
 
 /// <summary>
@@ -143,7 +144,7 @@ void Decision(TETRIS_DATA* tet)
         Debug("二手目をチェックしました。[%d]パターン見つかりました。\n", searchCount);
 
         // 評価値でソートします。
-        qsort(secondPattern, searchCount, sizeof(DECISION_TETRIS), cmpQsort);
+        sortDecisionTetris(secondPattern, searchCount);
         decisionPattern = &secondPattern[0];
     }
 
@@ -154,7 +155,7 @@ void Decision(TETRIS_DATA* tet)
         return;
     }
 
-    // 三手目以降を調べます。上位200手だけを採用して次の手を見ます。
+    // 三手目以降を調べます。上位250手だけを採用して次の手を見ます。
     int prevSearchCount = searchCount;
     DECISION_TETRIS* prevPattern = secondPattern;
     for (int next = 0; next < 10; next++)
@@ -162,9 +163,9 @@ void Decision(TETRIS_DATA* tet)
         DECISION_TETRIS* pattern = searchPattern[next];
 
         int nextSearch = prevSearchCount;
-        if (nextSearch > 200)
+        if (nextSearch > 250)
         {
-            nextSearch = 200;
+            nextSearch = 250;
         }
 
         int nextSearchCount = 0;
@@ -178,7 +179,7 @@ void Decision(TETRIS_DATA* tet)
         Debug("%d手目をチェックしました。[%d]パターン見つかりました。\n", next + 3, nextSearchCount);
 
         // 評価値でソートします。
-        qsort(pattern, nextSearchCount, sizeof(DECISION_TETRIS), cmpQsort);
+        sortDecisionTetris(pattern, nextSearchCount);
 
         // 一番評価の高いデータを保持します。
         decisionPattern = &pattern[0];
@@ -312,7 +313,9 @@ void getDecisionTetrisData(TETRIS_DATA *tetris)
     memcpy_s(tetris, sizeof(TETRIS_DATA), &decisionPattern->top->tetris, sizeof(TETRIS_DATA));
 }
 
-
+/// <summary>
+/// 評価値で並べ替えるクイックソートです。
+/// </summary>
 int cmpQsort(const void* d1, const void* d2)
 {
     if (((DECISION_TETRIS*)d1)->enable == FALSE)
@@ -335,6 +338,86 @@ int cmpQsort(const void* d1, const void* d2)
 
     return 0;
 }
+
+
+/// <summary>
+/// 意思決定の並び替えです。
+/// </summary>
+/// <param name="pattern"></param>
+/// <param name="count"></param>
+void sortDecisionTetris(DECISION_TETRIS* pattern, int count)
+{
+    // とりえず全部並び替える
+    qsort(pattern, count, sizeof(DECISION_TETRIS), cmpQsort);
+
+    // 上位250件中、150件以降はライン消去ができたデータを追加する
+    int lineClearCount = 0;
+    for (int i = 150; i < count - 1; i++)
+    {
+        // ライン消去していたらそのまま。
+        if (pattern[i].tetris.prevResult.deleteLine > 0)
+        {
+            continue;
+        }
+
+        // ライン消去なしの場合は後ろからライン消去しているデータを持ってくる。
+        BOOL swap = FALSE;
+        for (int n = i + 1; n < count - 1; n++)
+        {
+            if (pattern[n].tetris.prevResult.deleteLine > 0)
+            {
+                DECISION_TETRIS temp;
+                memcpy_s(&temp, sizeof(DECISION_TETRIS), &pattern[i], sizeof(DECISION_TETRIS));
+                memcpy_s(&pattern[i], sizeof(DECISION_TETRIS), &pattern[n], sizeof(DECISION_TETRIS));
+                memcpy_s(&pattern[n], sizeof(DECISION_TETRIS), &temp, sizeof(DECISION_TETRIS));
+                swap = TRUE;
+                break;
+            }
+        }
+
+        // 結局入れ替えできなければそれ以上ライン消去データはない
+        if (swap == FALSE)
+        {
+            lineClearCount = i;
+            break;
+        }
+    }
+
+    // さらにデータが入るなら最大の高さが4段以下のデータを追加する
+    for (int i = lineClearCount; i < count - 1; i++)
+    {
+        int y1[4] = { pattern[i].hash >> 40UL & 0xFF, pattern[i].hash >> 28UL & 0xFF, pattern[i].hash >> 16UL & 0xFF, pattern[i].hash >> 4UL & 0xFF };
+
+        if ((y1[0] >= 4) || (y1[1] >= 4) || (y1[2] >= 4) || (y1[3] >= 4))
+        {
+            continue;
+        }
+
+        // ライン消去なしの場合は後ろからライン消去しているデータを持ってくる。
+        BOOL swap = FALSE;
+        for (int n = i + 1; n < count - 1; n++)
+        {
+            int y2[4] = { pattern[i].hash >> 40UL & 0xFF, pattern[i].hash >> 28UL & 0xFF, pattern[i].hash >> 16UL & 0xFF, pattern[i].hash >> 4UL & 0xFF };
+            if ((y2[0] >= 4) || (y2[1] >= 4) || (y2[2] >= 4) || (y2[3] >= 4))
+            {
+                DECISION_TETRIS temp;
+                memcpy_s(&temp, sizeof(DECISION_TETRIS), &pattern[i], sizeof(DECISION_TETRIS));
+                memcpy_s(&pattern[i], sizeof(DECISION_TETRIS), &pattern[n], sizeof(DECISION_TETRIS));
+                memcpy_s(&pattern[n], sizeof(DECISION_TETRIS), &temp, sizeof(DECISION_TETRIS));
+                swap = TRUE;
+                break;
+            }
+        }
+
+        // 結局入れ替えできなければそれ以上ライン消去データはない
+        if (swap == FALSE)
+        {
+            break;
+        }
+    }
+}
+
+
 
 
 
