@@ -844,7 +844,9 @@ void getAttackPattern(EVAL_TABLE* evalT, TETRIS_DATA* tetris, int* boardHeight, 
         }
     }
 
-    int line = 0;
+    int lineD = 0;
+    int lineTR = 0;
+    int lineTL = 0;
     for (int x = 0; x < BOARD_W; x++)
     {
         for (int y = 0; y < boardHeight[x]; y++)
@@ -859,9 +861,12 @@ void getAttackPattern(EVAL_TABLE* evalT, TETRIS_DATA* tetris, int* boardHeight, 
             // 2  XXXXXXXX__
             // 1  XXXXXXXX__
             // 0  XXXXXXXX__
-            if (x < (BOARD_W - 2))
+            if (lineD < 4)
             {
-                lineTsd = checkTsd(board, x, y);
+                if (x < (BOARD_W - 2))
+                {
+                    lineTsd = checkTsd(board, x, y);
+                }
             }
 
             int lineTstR = 0;
@@ -874,9 +879,12 @@ void getAttackPattern(EVAL_TABLE* evalT, TETRIS_DATA* tetris, int* boardHeight, 
             // 2  XXXXXXX___
             // 1  XXXXXXX___
             // 0  XXXXXXX___
-            if (x < (BOARD_W - 3))
+            if (lineTR < 4)
             {
-                lineTstR = checkTstR(board, x, y);
+                if (x < (BOARD_W - 3))
+                {
+                    lineTstR = checkTstR(board, x, y);
+                }
             }
 
             int lineTstL = 0;
@@ -889,25 +897,41 @@ void getAttackPattern(EVAL_TABLE* evalT, TETRIS_DATA* tetris, int* boardHeight, 
             // 2  _XXXXXXX__
             // 1  _XXXXXXX__
             // 0  _XXXXXXX__
-            if ((x >= 1) && (x < (BOARD_W - 2)))
+            if (lineTL < 4)
             {
-                lineTstL = checkTstL(board, x, y);
+                if ((x >= 1) && (x < (BOARD_W - 2)))
+                {
+                    lineTstL = checkTstL(board, x, y);
+                }
             }
 
-            if (line > lineTsd) { line = lineTsd; }
-            if (line > lineTstR) { line = lineTstR; }
-            if (line > lineTstL) { line = lineTstL; }
-            if (line == 4) { break; }
+            if (lineD > lineTsd) { lineD = lineTsd; }
+            if (lineTR > lineTstR) { lineTR = lineTstR; }
+            if (lineTL > lineTstL) { lineTL = lineTstL; }
         }
     }
 
-    switch (line)
+    *out1 += 0;
+    switch (lineD)
     {
-    case 0: *out1 = 0; break;
-    case 1: *out1 = evalT->tsdForm[0]; break;
-    case 2: *out1 = evalT->tsdForm[1]; break;
-    case 3: *out1 = evalT->tsdForm[2]; break;
-    case 4: *out1 = evalT->tsdForm[3]; break;
+    case 1: *out1 += evalT->tsdForm[0]; break;
+    case 2: *out1 += evalT->tsdForm[1]; break;
+    case 3: *out1 += evalT->tsdForm[2]; break;
+    case 4: *out1 += evalT->tsdForm[3]; break;
+    }
+    switch (lineTR)
+    {
+    case 1: *out1 += evalT->tsdForm[0]; break;
+    case 2: *out1 += evalT->tsdForm[1]; break;
+    case 3: *out1 += evalT->tsdForm[2]; break;
+    case 4: *out1 += evalT->tsdForm[3]; break;
+    }
+    switch (lineTL)
+    {
+    case 1: *out1 += evalT->tsdForm[0]; break;
+    case 2: *out1 += evalT->tsdForm[1]; break;
+    case 3: *out1 += evalT->tsdForm[2]; break;
+    case 4: *out1 += evalT->tsdForm[3]; break;
     }
 }
 
