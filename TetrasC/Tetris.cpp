@@ -47,6 +47,10 @@ static int minoHandle[8];
 static int clearTimer = 0;
 static int clearTimerStart = 0;
 
+/// <summary>
+/// 新規ミノが出現するまでのタイマー
+/// </summary>
+static int newMinoTimer = 0;
 
 /// <summary>
 /// BAG関係
@@ -315,6 +319,7 @@ TETRIS_SCENE TetrisClear(void)
     {
         clearTimer = 0;
         CorrectBoard(tetrisData.board);
+        newMinoTimer = 5;
         return TETRIS_NEWMINO;
     }
     return TETRIS_CLEAR;
@@ -323,8 +328,13 @@ TETRIS_SCENE TetrisClear(void)
 
 TETRIS_SCENE TetrisNewmino(void)
 {
-    newMino(&tetrisData);
-    return TETRIS_INPUT;
+    newMinoTimer--;
+    if (newMinoTimer <= 0)
+    {
+        newMino(&tetrisData);
+        return TETRIS_INPUT;
+    }
+    return TETRIS_NEWMINO;
 }
 
 
