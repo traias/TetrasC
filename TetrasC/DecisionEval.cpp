@@ -154,7 +154,6 @@ void setEvalTableDefault(EVAL_TABLE* table)
 #endif
 
     // STANDARD
-#if true
     table->heightWait[0] = 0.9;
     table->heightWait[1] = 0.95;
     table->heightWait[2] = 0.98;
@@ -222,45 +221,6 @@ void setEvalTableDefault(EVAL_TABLE* table)
     table->ren = 0.3;
     table->delay = -0.04;
     table->btb = 0.8;
-
-// back_to_back: 52,
-// bumpiness : -24,
-// bumpiness_sq : -7,
-// row_transitions : -5,
-// height : -39,
-// top_half : -150,
-// top_quarter : -511,
-// jeopardy : -11,
-// cavity_cells : -173,
-// cavity_cells_sq : -3,
-// overhang_cells : -34,
-// overhang_cells_sq : -1,
-// covered_cells : -17,
-// covered_cells_sq : -1,
-// tslot : [8, 148, 192, 407] ,
-// well_depth : 57,
-// max_well_depth : 17,
-// well_column : [20, 23, 20, 50, 59, 21, 59, 10, -10, 24] ,
-// move_time : -3,
-// wasted_t : -152,
-// b2b_clear : 104,
-// clear1 : -143,
-// clear2 : -100,
-// clear3 : -58,
-// clear4 : 390,
-// tspin1 : 121,
-// tspin2 : 410,
-// tspin3 : 602,
-// mini_tspin1 : -158,
-// mini_tspin2 : -93,
-// perfect_clear : 999,
-// combo_garbage : 150,
-// use_bag : true,
-// timed_jeopardy : true,
-// stack_pc_damage : false,
-// sub_name : None,
-
-#endif
 
     // FAST
 #if false 
@@ -816,21 +776,8 @@ int setClosedArea(MINO_TYPE* board, int* closedBoard, int x, int y, int kind, in
 /// <param name="out1"></param>
 void getAttackPattern(EVAL_TABLE* evalT, TETRIS_DATA* tetris, int* boardHeight, double* out1)
 {
-    const int TEMP_BOARD_H = 20;
+    const int TEMP_BOARD_H = 30;
     int board[TEMP_BOARD_H] = { 0 };
-
-    /// Tが近い時だけ判定を行います。
-    if (
-        (tetris->hold != T) &&
-        (tetris->next[0] != T) &&
-        (tetris->next[1] != T) &&
-        (tetris->next[2] != T) &&
-        (tetris->next[3] != T)
-        )
-    {
-        out1 = 0;
-        return;
-    }
 
     // 仮のボードを作成します。
     for (int y = 0; y < TEMP_BOARD_H; y++)
@@ -849,7 +796,7 @@ void getAttackPattern(EVAL_TABLE* evalT, TETRIS_DATA* tetris, int* boardHeight, 
     int lineTL = 0;
     for (int x = 0; x < BOARD_W; x++)
     {
-        for (int y = 0; y < boardHeight[x]; y++)
+        for (int y = 0; y < boardHeight[x] - 5; y++)
         {
             int lineTsd = 0;
             // 探索範囲
@@ -941,50 +888,62 @@ void getAttackPattern(EVAL_TABLE* evalT, TETRIS_DATA* tetris, int* boardHeight, 
 // XoX 1
 int checkTsd(int* board, int x, int y)
 {
+    int count = 0;
     int line = 0;
+    BOOL spaceFail = FALSE;
 
     // XoX 1
-    if ((board[y] & (0x7 << x)) == 0x5)
+    if ((board[y] & (0x1 << x)) == 0x1)
     {
-        line = 1;
+        count++;
     }
-    else
+    if ((board[y] & (0x2 << x)) != 0x0)
     {
-        return line;
+        spaceFail = TRUE;
+    }
+    if ((board[y] & (0x4 << x)) == 0x1)
+    {
+        count++;
     }
 
     // ooo 2
-    if ((board[y + 1] & (0x7 << x)) == 0x0)
+    if ((board[y + 1] & (0x7 << x)) != 0x0)
     {
-        line = 2;
-    }
-    else
-    {
-        return line;
+        spaceFail = TRUE;
     }
 
     // X_X 3
-    if ((board[y + 2] & (0x7 << x)) == 0x1)
+    if ((board[y + 2] & (0x1 << x)) == 0x1)
     {
-        line = 3;
+        count++;
     }
-    else if ((board[y + 2] & (0x7 << x)) == 0x4)
+    if ((board[y + 2] & (0x2 << x)) != 0x0)
     {
-        line = 3;
+        spaceFail = TRUE;
     }
-    else
+    if ((board[y + 2] & (0x4 << x)) == 0x1)
     {
-        return line;
+        count++;
     }
 
     // ___ 4
-    if ((board[y + 3] & (0x7 << x)) == 0x0)
+    if ((board[y + 3] & (0x2 << x)) != 0x0)
     {
-        line = 4;
+        spaceFail = TRUE;
     }
-    else
+
+    if (spaceFail == TRUE)
     {
-        return line;
+        return 0;
+    }
+
+    switch (count)
+    {
+    case 0: line = 0; break;
+    case 1: line = 2; break;
+    case 2: line = 3; break;
+    case 3: line = 4; break;
+    case 4: line = 4; break;
     }
 
     return line;
@@ -994,7 +953,7 @@ int checkTsd(int* board, int x, int y)
 // ?__ 3
 // XoX 3
 // ?oo 2
-// ?oX 1
+// ?o? 1
 // ?X? 0
 int checkTstR(int* board, int x, int y)
 {
@@ -1009,8 +968,8 @@ int checkTstR(int* board, int x, int y)
         return line;
     }
 
-    // ?oX 1
-    if ((board[y + 1] & (0x6 << x)) == 0x4)
+    // ?o? 1
+    if ((board[y + 1] & (0x2 << x)) == 0x0)
     {
         line = 1;
     }
@@ -1042,7 +1001,7 @@ int checkTstR(int* board, int x, int y)
     // ?__ 3
     if ((board[y + 4] & (0x6 << x)) == 0x0)
     {
-        line = 3;
+        line = 4;
     }
     else
     {
@@ -1062,7 +1021,7 @@ int checkTstR(int* board, int x, int y)
 // __? 3
 // XoX 3
 // oo? 2
-// Xo? 1
+// ?o? 1
 // ?X? 0
 int checkTstL(int* board, int x, int y)
 {
@@ -1077,8 +1036,8 @@ int checkTstL(int* board, int x, int y)
         return line;
     }
 
-    // Xo? 1
-    if ((board[y + 1] & (0x3 << x)) == 0x1)
+    // ?o? 1
+    if ((board[y + 1] & (0x2 << x)) == 0x0)
     {
         line = 1;
     }
@@ -1110,7 +1069,7 @@ int checkTstL(int* board, int x, int y)
     // __? 3
     if ((board[y + 4] & (0x3 << x)) == 0x0)
     {
-        line = 3;
+        line = 4;
     }
     else
     {
