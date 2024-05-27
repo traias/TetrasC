@@ -3,6 +3,7 @@
 #include "Key.h"
 #include "TetrisData.h"
 #include "AI.h"
+#include "DecisionEval.h"
 #include <format>
 #include <time.h>
 #include <iostream>
@@ -193,6 +194,12 @@ TETRIS_SCENE TetrisInput(void)
     {
         MovePut(&tetrisData);
         finishDrop(&tetrisData);
+
+        EVAL_TABLE evalTable;
+        setEvalTableDefault(&evalTable);
+        double eval[20];
+        GetEvaluation(&tetrisData, eval, &evalTable);
+
         int deleteLine = setFillBoardDeleteCell(tetrisData.board);
         switch (deleteLine)
         {
