@@ -729,8 +729,8 @@ void getAttackPattern(EVAL_TABLE* evalT, TETRIS_DATA* tetris, int* boardHeight, 
     int lineTL = 0;
     for (int x = 0; x < BOARD_W; x++)
     {
-        int yMin = boardHeight[x] - 10;
-        int yMax = boardHeight[x];
+        int yMin = boardHeight[x] - 7;
+        int yMax = boardHeight[x] + 5;
         if (yMin < 0) { yMin = 0; }
         if (yMax >= TEMP_BOARD_H) { yMax = TEMP_BOARD_H; }
 
@@ -896,7 +896,10 @@ int checkTstR(int* board, int x, int y)
     int line = 0;
 
     // ?X? 0
-    if ((board[y + 0] & (0x2 << x)) == (0x2 << x))
+    if ((y - 1) < 0)
+    {
+    }
+    else if ((board[y - 1] & (0x2 << x)) == (0x2 << x))
     {
     }
     else
@@ -905,7 +908,7 @@ int checkTstR(int* board, int x, int y)
     }
 
     // ?o? 1
-    if ((board[y + 1] & (0x2 << x)) == 0x0)
+    if ((board[y + 0] & (0x2 << x)) == 0x0)
     {
         line = 1;
     }
@@ -915,7 +918,7 @@ int checkTstR(int* board, int x, int y)
     }
 
     // ?oo 2
-    if ((board[y + 2] & (0x6 << x)) == 0x0)
+    if ((board[y + 1] & (0x6 << x)) == 0x0)
     {
         line = 2;
     }
@@ -925,7 +928,7 @@ int checkTstR(int* board, int x, int y)
     }
 
     // XoX 3
-    if ((board[y + 3] & (0x7 << x)) == (0x5 << x))
+    if ((board[y + 2] & (0x7 << x)) == (0x5 << x))
     {
         line = 3;
     }
@@ -935,7 +938,7 @@ int checkTstR(int* board, int x, int y)
     }
 
     // ?__ 3
-    if ((board[y + 4] & (0x6 << x)) == 0x0)
+    if ((board[y + 3] & (0x6 << x)) == 0x0)
     {
         line = 4;
     }
@@ -945,7 +948,7 @@ int checkTstR(int* board, int x, int y)
     }
 
     // ?X_ 4
-    if ((board[y + 5] & (0x2 << x)) == (0x2 << x))
+    if ((board[y + 4] & (0x2 << x)) == (0x2 << x))
     {
         line = 4;
     }
@@ -964,7 +967,10 @@ int checkTstL(int* board, int x, int y)
     int line = 0;
 
     // ?X? 0
-    if ((board[y + 0] & (0x2 << x)) == (0x2 << x))
+    if ((y - 1) < 0)
+    {
+    }
+    else if ((board[y  - 1] & (0x2 << x)) == (0x2 << x))
     {
     }
     else
@@ -973,7 +979,7 @@ int checkTstL(int* board, int x, int y)
     }
 
     // ?o? 1
-    if ((board[y + 1] & (0x2 << x)) == 0x0)
+    if ((board[y + 0] & (0x2 << x)) == 0x0)
     {
         line = 1;
     }
@@ -983,7 +989,7 @@ int checkTstL(int* board, int x, int y)
     }
 
     // oo? 2
-    if ((board[y + 2] & (0x3 << x)) == 0x0)
+    if ((board[y + 1] & (0x3 << x)) == 0x0)
     {
         line = 2;
     }
@@ -993,7 +999,7 @@ int checkTstL(int* board, int x, int y)
     }
 
     // XoX 3
-    if ((board[y + 3] & (0x7 << x)) == (0x5 << x))
+    if ((board[y + 2] & (0x7 << x)) == (0x5 << x))
     {
         line = 3;
     }
@@ -1003,7 +1009,7 @@ int checkTstL(int* board, int x, int y)
     }
 
     // __? 3
-    if ((board[y + 4] & (0x3 << x)) == 0x0)
+    if ((board[y + 3] & (0x3 << x)) == 0x0)
     {
         line = 4;
     }
@@ -1013,7 +1019,7 @@ int checkTstL(int* board, int x, int y)
     }
 
     // _X? 4
-    if ((board[y + 5] & (0x2 << x)) == (0x2 << x))
+    if ((board[y + 4] & (0x2 << x)) == (0x2 << x))
     {
         line = 4;
     }
