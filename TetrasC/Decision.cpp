@@ -10,6 +10,10 @@ using namespace std;
 
 
 
+#define MAX_SEARCH      250
+#define BASE_SEARCH     200
+
+
 /// <summary>
 /// ドロップパターンを取得します。
 /// </summary>
@@ -95,7 +99,7 @@ void DecisionSystemInit(void)
     secondPattern = (DECISION_TETRIS*)calloc(96 * 96, sizeof(DECISION_TETRIS));
     for (int i = 0; i < 10; i++)
     {
-        searchPattern[i] = (DECISION_TETRIS*)calloc(200 * 96, sizeof(DECISION_TETRIS));
+        searchPattern[i] = (DECISION_TETRIS*)calloc(MAX_SEARCH * 96, sizeof(DECISION_TETRIS));
     }
 
     // デフォルトの評価テーブルを取得します。
@@ -163,9 +167,9 @@ void Decision(TETRIS_DATA* tet)
         DECISION_TETRIS* pattern = searchPattern[next];
 
         int nextSearch = prevSearchCount;
-        if (nextSearch > 250)
+        if (nextSearch > MAX_SEARCH)
         {
-            nextSearch = 250;
+            nextSearch = MAX_SEARCH;
         }
 
         int nextSearchCount = 0;
@@ -352,7 +356,7 @@ void sortDecisionTetris(DECISION_TETRIS* pattern, int count)
 
     // 上位250件中、150件以降はライン消去ができたデータを追加する
     int lineClearCount = 0;
-    for (int i = 150; i < count - 1; i++)
+    for (int i = BASE_SEARCH; i < count - 1; i++)
     {
         // ライン消去していたらそのまま。
         if (pattern[i].tetris.prevResult.deleteLine > 0)
