@@ -91,69 +91,6 @@ void GetLineClear(EVAL_TABLE* evalT, TETRIS_DATA* tetris, double* out1);
 /// <param name="table"></param>
 void setEvalTableDefault(EVAL_TABLE* table)
 {
-#if false
-    table->heightWait[0] = 0.9;
-    table->heightWait[1] = 0.95;
-    table->heightWait[2] = 0.98;
-    table->heightWait[3] = 1;
-    table->heightWait[4] = 1;
-    table->height = -0.40;
-    table->heightMid = -0.10;
-    table->heightTop = -0.10;
-    table->roofWait[0] = 1;
-    table->roofWait[1] = 2;
-    table->roofWait[2] = 1.5;
-    table->roofWait[3] = 1;
-    table->roofWait[4] = 1;
-    table->roof = -0.15;
-    table->roofSq = -0.03;
-    table->wellWait[0] = -0.5;
-    table->wellWait[1] = -0.7;
-    table->wellWait[2] = -0.2;
-    table->wellWait[3] = 0.7;
-    table->wellWait[4] = 0.7;
-    table->well = 0.05;
-    table->surfaceWait[0] = 0.7;
-    table->surfaceWait[1] = 0.8;
-    table->surfaceWait[2] = 0.9;
-    table->surface = -0.2;
-    table->surfaceSq = -0.2;
-    table->cave = -0.08;
-    table->caveSq = -0.05;
-    table->close = -3.6;
-    table->closeSq = -0.3;
-    table->tsdForm[0] = 0.0;
-    table->tsdForm[1] = 0.2;
-    table->tsdForm[2] = 0.1;
-    table->tsdForm[3] = 0.7;
-    table->tsdForm[4] = 1.8;
-    table->tstForm[0] = 0.0;
-    table->tstForm[1] = 0.0;
-    table->tstForm[2] = 0.0;
-    table->tstForm[3] = 0.0;
-    table->tstForm[4] = 5.0;
-    table->holdT = 0.05;
-    table->holdI = 0.10;
-    table->holdO = -0.02;
-    table->pcForm = 0.5;
-    table->useT = -3.00;
-    table->useI = -0.50;
-    table->pc = 99;
-    table->tss = 2.8;
-    table->tsm = -1.5;
-    table->line1 = -8.8;
-    table->tsd = 7.20;
-    table->tsmd = -1.0;
-    table->line2 = -7.6;
-    table->tst = 9;
-    table->line3 = -7.4;
-    table->line4 = 4.5;
-    table->ren = 0.6;
-    table->delay = -0.01;
-    table->btb = 0.5;
-#endif
-
-    // STANDARD
     table->heightWait[0] = 0.9;
     table->heightWait[1] = 0.95;
     table->heightWait[2] = 0.98;
@@ -221,9 +158,16 @@ void setEvalTableDefault(EVAL_TABLE* table)
     table->ren = 0.3;
     table->delay = -0.04;
     table->btb = 0.8;
+}
 
-    // FAST
-#if false 
+
+
+/// <summary>
+/// •]‰¿ƒe[ƒuƒ‹’l‚ğİ’è‚µ‚Ü‚·B
+/// </summary>
+/// <param name="table"></param>
+void setEvalTableFast(EVAL_TABLE* table)
+{
     table->heightWait[0] = 0.9;
     table->heightWait[1] = 0.95;
     table->heightWait[2] = 0.98;
@@ -254,16 +198,12 @@ void setEvalTableDefault(EVAL_TABLE* table)
     table->caveSq = -0.05;
     table->close = -3.6;
     table->closeSq = -0.3;
-    table->tsdForm[0] = 0.0;
-    table->tsdForm[1] = 0.2;
-    table->tsdForm[2] = 0.1;
-    table->tsdForm[3] = 0.7;
-    table->tsdForm[4] = 1.8;
-    table->tstForm[0] = 0.0;
-    table->tstForm[1] = 0.0;
-    table->tstForm[2] = 0.0;
-    table->tstForm[3] = 0.0;
-    table->tstForm[4] = 5.0;
+
+    table->tsdForm[0] = 0.2;
+    table->tsdForm[1] = 1.0;
+    table->tsdForm[2] = 1.2;
+    table->tsdForm[3] = 2.5;
+
     table->holdT = 0.05;
     table->holdI = 0.10;
     table->holdO = -0.02;
@@ -283,8 +223,6 @@ void setEvalTableDefault(EVAL_TABLE* table)
     table->ren = 0.6;
     table->delay = -0.01;
     table->btb = 0.5;
-
-
 
     // back_to_back: 10,
     // bumpiness: -7,
@@ -321,12 +259,7 @@ void setEvalTableDefault(EVAL_TABLE* table)
     // use_bag : true,
     // timed_jeopardy : false,
     // stack_pc_damage : false,
-    // sub_name : None,
-
-#endif
 }
-
-
 
 
 /// •]‰¿ŠÖ”ŒQ‚ÌÀ‘•‚Å‚·
@@ -796,7 +729,12 @@ void getAttackPattern(EVAL_TABLE* evalT, TETRIS_DATA* tetris, int* boardHeight, 
     int lineTL = 0;
     for (int x = 0; x < BOARD_W; x++)
     {
-        for (int y = 0; y < boardHeight[x] - 5; y++)
+        int yMin = boardHeight[x] - 10;
+        int yMax = boardHeight[x];
+        if (yMin < 0) { yMin = 0; }
+        if (yMax >= TEMP_BOARD_H) { yMax = TEMP_BOARD_H; }
+
+        for (int y = yMin; y < yMax; y++)
         {
             int lineTsd = 0;
             // ’Tõ”ÍˆÍ
@@ -852,13 +790,13 @@ void getAttackPattern(EVAL_TABLE* evalT, TETRIS_DATA* tetris, int* boardHeight, 
                 }
             }
 
-            if (lineD > lineTsd) { lineD = lineTsd; }
-            if (lineTR > lineTstR) { lineTR = lineTstR; }
-            if (lineTL > lineTstL) { lineTL = lineTstL; }
+            if (lineD < lineTsd) { lineD = lineTsd; }
+            if (lineTR < lineTstR) { lineTR = lineTstR; }
+            if (lineTL < lineTstL) { lineTL = lineTstL; }
         }
     }
 
-    *out1 += 0;
+    *out1 = 0;
     switch (lineD)
     {
     case 1: *out1 += evalT->tsdForm[0]; break;
@@ -890,49 +828,47 @@ int checkTsd(int* board, int x, int y)
 {
     int count = 0;
     int line = 0;
-    BOOL spaceFail = FALSE;
 
     // XoX 1
-    if ((board[y] & (0x1 << x)) == 0x1)
+    if ((board[y] & (0x1 << x)) == (0x1 << x))
     {
         count++;
     }
     if ((board[y] & (0x2 << x)) != 0x0)
     {
-        spaceFail = TRUE;
+        return 0;
     }
-    if ((board[y] & (0x4 << x)) == 0x1)
+    if ((board[y] & (0x4 << x)) == (0x4 << x))
     {
         count++;
+    }
+    if (count == 0)
+    {
+        return 0;
     }
 
     // ooo 2
     if ((board[y + 1] & (0x7 << x)) != 0x0)
     {
-        spaceFail = TRUE;
+        return 0;
     }
 
     // X_X 3
-    if ((board[y + 2] & (0x1 << x)) == 0x1)
+    if ((board[y + 2] & (0x1 << x)) == (0x1 << x))
     {
         count++;
     }
     if ((board[y + 2] & (0x2 << x)) != 0x0)
     {
-        spaceFail = TRUE;
+        return 0;
     }
-    if ((board[y + 2] & (0x4 << x)) == 0x1)
+    if ((board[y + 2] & (0x4 << x)) == (0x4 << x))
     {
         count++;
     }
 
     // ___ 4
     if ((board[y + 3] & (0x2 << x)) != 0x0)
-    {
-        spaceFail = TRUE;
-    }
-
-    if (spaceFail == TRUE)
     {
         return 0;
     }
@@ -960,7 +896,7 @@ int checkTstR(int* board, int x, int y)
     int line = 0;
 
     // ?X? 0
-    if ((board[y + 0] & (0x2 << x)) == 0x2)
+    if ((board[y + 0] & (0x2 << x)) == (0x2 << x))
     {
     }
     else
@@ -989,7 +925,7 @@ int checkTstR(int* board, int x, int y)
     }
 
     // XoX 3
-    if ((board[y + 3] & (0x7 << x)) == 0x5)
+    if ((board[y + 3] & (0x7 << x)) == (0x5 << x))
     {
         line = 3;
     }
@@ -1009,7 +945,7 @@ int checkTstR(int* board, int x, int y)
     }
 
     // ?X_ 4
-    if ((board[y + 5] & (0x6 << x)) == 0x2)
+    if ((board[y + 5] & (0x2 << x)) == (0x2 << x))
     {
         line = 4;
     }
@@ -1028,7 +964,7 @@ int checkTstL(int* board, int x, int y)
     int line = 0;
 
     // ?X? 0
-    if ((board[y + 0] & (0x2 << x)) == 0x2)
+    if ((board[y + 0] & (0x2 << x)) == (0x2 << x))
     {
     }
     else
@@ -1057,7 +993,7 @@ int checkTstL(int* board, int x, int y)
     }
 
     // XoX 3
-    if ((board[y + 3] & (0x7 << x)) == 0x5)
+    if ((board[y + 3] & (0x7 << x)) == (0x5 << x))
     {
         line = 3;
     }
@@ -1077,7 +1013,7 @@ int checkTstL(int* board, int x, int y)
     }
 
     // _X? 4
-    if ((board[y + 5] & (0x3 << x)) == 0x2)
+    if ((board[y + 5] & (0x2 << x)) == (0x2 << x))
     {
         line = 4;
     }
